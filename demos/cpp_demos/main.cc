@@ -5,9 +5,13 @@ descriptions: implement demo for c++
 */
 
 #include <stdio.h>
-
+#include "test.h"
 int main(int argc, char const *argv[])
 {
-    printf("hello this is htdf test demo\n");
-    return 0;
+    // TestSha256();
+    // TestStrToJsonObj();
+    // TestBuildAndSingTx();
+    // TestHtdfRawTx();
+    // TestBroadcastTx();
+    TestPrivKeyToPubKeyCompress();
 }
