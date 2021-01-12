@@ -1,35 +1,10 @@
-#include <openssl/sha.h> 
-#include <secp256k1.h>
-#include <secp256k1_recovery.h>
+#include <openssl/sha.h>
 
-#include "utils.h"
-#include "htdf.h"
+#include "htdf/utils.h"
+#include "htdf/htdf.h"
 #include "test.h"
 
 using namespace std;
-// using namespace boost::property_tree;
-
-//简单json字符获取值
-// void TestStrToJsonObj()
-// {
-//     std::string strTmpJson = "{\"name\":\"yqq\", \"age\":99, \"isTest\":true}";
-//     std::stringstream ss(strTmpJson);
-//     boost::property_tree::ptree root;
-//     try
-//     {
-//         boost::property_tree::read_json(ss, root);
-//     }
-//     catch (const std::exception &e)
-//     {
-//         std::cout << "read_json  error:" << e.what() << std::endl;
-//     }
-
-//     for (auto it = root.begin(); it != root.end(); it++)
-//     {
-//         std::string ssTmp;
-//         std::cout << it->first << ":" << root.get<std::string>(it->first) << std::endl;
-//     }
-// }
 
 void TestSha256()
 {
@@ -185,7 +160,7 @@ void TestBuildAndSingTx()
         std::cout << "错误:" << strOut << std::endl;
         return;
     }
-    std::cout << "json:  " << std::endl << strOut << std::endl;
+    std::cout << "json:  " << std::endl  << strOut << std::endl;
     std::string strJsonRight = R"({"account_number":"11","chain_id":"testchain","fee":{"gas_price":"100","gas_wanted":"200000"},"memo":"yqq","msgs":[{"Amount":[{"amount":"12345678","denom":"satoshi"}],"Data":"","From":"htdf1jrh6kxrcr0fd8gfgdwna8yyr9tkt99ggmz9ja2","GasPrice":100,"GasWanted":200000,"To":"htdf1m5phsvgrwpxdsmah5cqkvd6ffz9xzrc3e0jkr2"}],"sequence":"8"})";
     if (strJsonRight == strOut)
     {
@@ -250,13 +225,12 @@ void TestBuildAndSingTx()
     }
 }
 
-
 void TestPrivKeyToPubKeyCompress()
 {
     string strPrivKey = "f4c3b67fb023405e615994f12bcfad63255d90b47c179d7bb00f612000dd5a2b";
     string strPubKey;
     string strRightPubKey = "02af7557b38a3f2313e49ca2109859736786832052bc8bca2cf5ae81d3f5e21e83";
-    if( 0 == htdf::PrivateKeyToCompressPubKey(strPrivKey, strPubKey) )
+    if (0 == htdf::PrivateKeyToCompressPubKey(strPrivKey, strPubKey))
     {
         cout << "TestPrivKeyToPubKeyCompress:PASSED" << endl;
     }
