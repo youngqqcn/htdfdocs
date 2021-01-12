@@ -7,6 +7,6 @@ set(CMAKE_BUILD_TYPE Debug)
 find_package(OpenSSL REQUIRED)
 find_library(secp256k1 libsecp256k1.a)
 
-add_executable(main main.cc test.cc htdf/htdf.cc)
+add_executable(main main.cc test.cc htdf/htdf.cc rand.cpp)
 target_link_libraries(main libsecp256k1.a OpenSSL::SSL)
 

@@ -10,4 +10,6 @@ void TestBroadcastTx();
 void TestBuildAndSingTx();
 void TestPrivKeyToPubKeyCompress();
 
+void TestGetOsRand();
+
 #endif //_CPP_DEMOS_TEST_H_

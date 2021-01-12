@@ -88,6 +88,8 @@ int htdf::sign(
     memcpy(pszOut, uszSigRSData, UINT_SIG_RS_LEN);
     *puOutDataLen = UINT_SIG_RS_LEN;
 
+    // no need to destroy
+    // secp256k1_context_destroy(const_cast<secp256k1_context*>(ctx));
     return htdf::NO_ERROR;
 }
 

@@ -14,10 +14,13 @@ decriptions:  HTDF transaction signature wrapper
 #include "constant.h"
 #include "utils.h"
 
+#include <secp256k1.h>
 using namespace std;
 
 namespace htdf
 {
+
+
     int sign(
         unsigned char *pszIn,
         unsigned int uInLen,

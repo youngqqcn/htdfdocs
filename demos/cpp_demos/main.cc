@@ -9,9 +9,10 @@ descriptions: implement demo for c++
 
 int main(int argc, char const *argv[])
 {
-    TestSha256();
-    TestBuildAndSingTx();
-    TestHtdfRawTx();
-    TestBroadcastTx();
-    TestPrivKeyToPubKeyCompress();
+    // TestSha256();
+    // TestBuildAndSingTx();
+    // TestHtdfRawTx();
+    // TestBroadcastTx();
+    // TestPrivKeyToPubKeyCompress();
+    TestGetOsRand();
 }

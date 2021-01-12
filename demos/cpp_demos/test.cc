@@ -3,6 +3,7 @@
 #include "htdf/utils.h"
 #include "htdf/htdf.h"
 #include "test.h"
+#include "rand.h"
 
 using namespace std;
 
@@ -238,4 +239,17 @@ void TestPrivKeyToPubKeyCompress()
     {
         cout << "TestPrivKeyToPubKeyCompress:FAILED" << endl;
     }
+}
+
+void TestGetOsRand()
+{
+    unsigned char buf[32];
+    int ret = GetOSRand(buf);
+    if(0  != ret)
+    {
+        cout << "GetOSRand() error" << endl;
+        return;
+    }
+    string strRand = Bin2HexStr(buf, sizeof(buf));
+    cout << "rand = " << strRand << endl;
 }
