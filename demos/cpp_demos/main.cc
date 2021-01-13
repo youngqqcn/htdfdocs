@@ -19,7 +19,7 @@ int main(int argc, char const *argv[])
     TestPubkToAddress();
     TestBitcoinSHA256();
     TestBitcoinRipemd160();
-    TestBase64();
+    // TestBase64();
     TestBech32();
     TestHex2Bin();
     TestBitcoinHex2Bin();

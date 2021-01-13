@@ -8,9 +8,12 @@ descriptions: htdf transaction signature
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
 
-#include <boost/format.hpp>
-#include <boost/algorithm/string.hpp>
 #include "crypto/strencodings.h"
+#include "crypto/hash.h"
+#include "bech32/bech32.h"
+#include "crypto/strencodings.h"
+#include "crypto/tinyformat.h"
+#include "crypto/string.h"
 
 using namespace htdf;
 
@@ -242,62 +245,63 @@ bool CRawTx::checkParams(string &strErrMsg)
 {
     if (INTMAX_MAX == uAccountNumber || 0 == uAccountNumber)
     {
-        strErrMsg = boost::str(boost::format("invalid `account_number`: %lu , must between %lu and %lu.") % uAccountNumber % 0 % INTMAX_MAX);
+        // strErrMsg = tfm::format("invalid `account_number`: %lu , must between %lu and %lu.") % uAccountNumber % 0 % INTMAX_MAX);
+        strErrMsg = tfm::format("invalid `account_number`: %lu , must between %lu and %lu.", uAccountNumber, 0, INTMAX_MAX);
         return false;
     }
 
     if (!(0 == strcmp(STR_MAINCHAIN, szChainId) || 0 == strcmp(STR_TESTCHAIN, szChainId)))
     {
-        strErrMsg = boost::str(boost::format("invalid `chain_id`: %s, must be '%s'or '%s' . ") % szChainId % STR_MAINCHAIN % STR_TESTCHAIN);
+        strErrMsg = tfm::format("invalid `chain_id`: %s, must be '%s'or '%s' . ", szChainId, STR_MAINCHAIN, STR_TESTCHAIN);
         return false;
     }
 
     if (UINT_MAX_FEE_AMOUNT < uFeeAmount || uFeeAmount < UINT_MIN_FEE_AMOUNT)
     {
-        strErrMsg = boost::str(boost::format("invalid `fee amount`, must between %d and %d.") % UINT_MIN_FEE_AMOUNT % UINT_MAX_FEE_AMOUNT);
+        strErrMsg = tfm::format("invalid `fee amount`, must between %d and %d.", UINT_MIN_FEE_AMOUNT, UINT_MAX_FEE_AMOUNT);
         return false;
     }
 
     if (UINT_MAX_GAS_AMOUNT < uGas || uGas < UINT_MIN_GAS_AMOUNT)
     {
-        strErrMsg = boost::str(boost::format("invalid `fee gas` : %lu, must between %lu and %lu.") % uGas % UINT_MIN_GAS_AMOUNT % UINT_MAX_GAS_AMOUNT);
+        strErrMsg = tfm::format("invalid `fee gas` : %lu, must between %lu and %lu.", uGas, UINT_MIN_GAS_AMOUNT, UINT_MAX_GAS_AMOUNT);
         return false;
     }
 
     if (!(0 == strcmp(STR_SATOSHI, szFeeDenom)))
     {
-        strErrMsg = boost::str(boost::format("invalid `fee denom` : %s, must be `%s`.") % szFeeDenom % STR_SATOSHI);
+        strErrMsg = tfm::format("invalid `fee denom` : %s, must be `%s`.", szFeeDenom, STR_SATOSHI);
         return false;
     }
 
     if (!(0 == strcmp(STR_SATOSHI, szMsgDenom)))
     {
-        strErrMsg = boost::str(boost::format("invalid `msgs amount denom` : %s, must be `%s`.") % szMsgDenom % STR_SATOSHI);
+        strErrMsg = tfm::format("invalid `msgs amount denom` : %s, must be `%s`.", szMsgDenom, STR_SATOSHI);
         return false;
     }
 
     int nAddrLen = UINT_ADDR_LEN;
     if (nAddrLen != strlen(szMsgFrom))
     {
-        strErrMsg = boost::str(boost::format("invalid address `msg From`:%s, address length must be %d.") % szMsgFrom % nAddrLen);
+        strErrMsg = tfm::format("invalid address `msg From`:%s, address length must be %d.", szMsgFrom, nAddrLen);
         return false;
     }
 
     if (nAddrLen != strlen(szMsgTo))
     {
-        strErrMsg = boost::str(boost::format("invalid address `msg To`:%s, address length must be %d.") % szMsgTo % nAddrLen);
+        strErrMsg = tfm::format("invalid address `msg To`:%s, address length must be %d.", szMsgTo, nAddrLen);
         return false;
     }
 
-    if (!boost::starts_with(szMsgFrom, string(STR_HTDF) + "1"))
+    if (0 != string(szMsgFrom).find(STR_HTDF "1"))
     {
-        strErrMsg = boost::str(boost::format("invalid address `From`:%s.") % szMsgFrom);
+        strErrMsg = tfm::format("invalid address `From`:%s.", szMsgFrom);
         return false;
     }
 
-    if (!boost::starts_with(szMsgTo, string(STR_HTDF) + "1"))
+    if (0 != string(szMsgTo).find(STR_HTDF "1"))
     {
-        strErrMsg = boost::str(boost::format("invalid address `To`:%s.") % szMsgTo);
+        strErrMsg = tfm::format("invalid address `To`:%s.", szMsgTo);
         return false;
     }
 
@@ -356,13 +360,12 @@ bool CBroadcastTx::toString(string &strRet)
 
     //type
     strJson += "\"type\":\"" + strType + "\",";
-    boost::trim(strJson);
 
     //value
     strJson += "\"value\":{";
 
     //msg
-    strJson += boost::str(boost::format("\
+    strJson += tfm::format("\
 			\"msg\":[{\
 				\"type\":\"%s\",\
 				\"value\":{\
@@ -376,35 +379,34 @@ bool CBroadcastTx::toString(string &strRet)
 					\"GasPrice\":\"%lu\",\
 					\"GasWanted\":\"%lu\"\
 				  }\
-			}],") % strMsgType %
-                          rtx.szMsgFrom %
-                          rtx.szMsgTo % rtx.szMsgDenom % rtx.uMsgAmount % rtx.szData % rtx.uFeeAmount % rtx.uGas);
+			}],",
+                           strMsgType,
+                           rtx.szMsgFrom,
+                           rtx.szMsgTo, rtx.szMsgDenom, rtx.uMsgAmount, rtx.szData, rtx.uFeeAmount, rtx.uGas);
 
     //fee
-    strJson += boost::str(boost::format("\
+    strJson += tfm::format("\
 				\"fee\":{\
 					\"gas_price\":\"%lu\",\
 					\"gas_wanted\":\"%lu\"\
-				},") % rtx.uFeeAmount %
-                          rtx.uGas);
+				},",
+                           rtx.uFeeAmount,
+                           rtx.uGas);
 
     //signatures
-    strJson += boost::str(boost::format("\
+    strJson += tfm::format("\
 			\"signatures\":[{\
 				\"pub_key\":{\
 					\"type\":\"%s\",\
 					\"value\":\"%s\"\
 				},\
 				\"signature\":\"%s\"\
-			}],") % strPubKeyType %
-                          strPubkeyValue % strSignature);
+			}],",
+                           strPubKeyType,
+                           strPubkeyValue, strSignature);
 
-    strJson = boost::algorithm::erase_all_copy(strJson, " ");
-    strJson = boost::algorithm::erase_all_copy(strJson, "\t");
-    strJson = boost::algorithm::erase_all_copy(strJson, "\n");
-    strJson = boost::algorithm::erase_all_copy(strJson, "\r");
-
-    strJson += boost::str(boost::format("\"memo\":\"%s\"") % rtx.szMemo);
+    strJson = RemoveSpace(strJson);
+    strJson += tfm::format("\"memo\":\"%s\"", rtx.szMemo);
 
     strJson += "}"; //value
     strJson += "}"; //root
@@ -424,29 +426,29 @@ bool CBroadcastTx::checkParams(string &strErrMsg)
 
     if (STR_BROADCAST_MSG_TYPE != strMsgType && STR_BROADCAST_MSG_TYPE_HET != strMsgType)
     {
-        strErrMsg = boost::str(boost::format("invalid `msg type` : '%s', must be '%s' or '%s'.") % strMsgType % STR_BROADCAST_MSG_TYPE % STR_BROADCAST_MSG_TYPE_HET);
+        strErrMsg = tfm::format("invalid `msg type` : '%s', must be '%s' or '%s'.", strMsgType, STR_BROADCAST_MSG_TYPE, STR_BROADCAST_MSG_TYPE_HET);
         return false;
     }
 
     if (STR_BROADCAST_PUB_KEY_TYPE != strPubKeyType)
     {
-        strErrMsg = boost::str(boost::format("invalid `pub_key type` : '%s', must be '%s'.") % strPubKeyType % STR_BROADCAST_PUB_KEY_TYPE);
+        strErrMsg = tfm::format("invalid `pub_key type` : '%s', must be '%s'.", strPubKeyType, STR_BROADCAST_PUB_KEY_TYPE);
         return false;
     }
 
     if (strPubkeyValue.empty())
     {
 
-        strErrMsg = boost::str(boost::format("invalid `pub_key value` is empty, must be base64(pubkey).") % strPubKeyType % STR_BROADCAST_PUB_KEY_TYPE);
+        strErrMsg = tfm::format("invalid `pub_key value` is empty, must be base64(pubkey).", strPubKeyType, STR_BROADCAST_PUB_KEY_TYPE);
         return false;
     }
 
     string strTmpDecode;
-    
+
     strTmpDecode = DecodeBase64(strPubkeyValue);
     if (UINT_PUB_KEY_LEN != strTmpDecode.size())
     {
-        strErrMsg = boost::str(boost::format("invalid `pub_key value` length %d is not %d. After base64 decode, pubkey's length must be %d.") % strTmpDecode.size() % UINT_PUB_KEY_LEN % UINT_PUB_KEY_LEN);
+        strErrMsg = tfm::format("invalid `pub_key value` length %d is not %d. After base64 decode, pubkey's length must be %d.", strTmpDecode.size(), UINT_PUB_KEY_LEN, UINT_PUB_KEY_LEN);
         return false;
     }
 
@@ -454,7 +456,7 @@ bool CBroadcastTx::checkParams(string &strErrMsg)
     strTmpDecode = DecodeBase64(strSignature);
     if (UINT_SIG_RS_LEN != strTmpDecode.size())
     {
-        strErrMsg = boost::str(boost::format("invalid `signature` length is not %d. After base64 decode, signature's length must be %d.") % UINT_SIG_RS_LEN % UINT_SIG_RS_LEN);
+        strErrMsg = tfm::format("invalid `signature` length is not %d. After base64 decode, signature's length must be %d.", UINT_SIG_RS_LEN, UINT_SIG_RS_LEN);
         return false;
     }
 
@@ -483,7 +485,7 @@ bool CBroadcastTx::toHexStr(string &strOut)
     strRet = "";
     for (size_t i = 0; i < strHex.size(); i++)
     {
-        strRet += boost::str(boost::format("%02x") % ((int)strHex[i]));
+        strRet += tfm::format("%02x", ((int)strHex[i]));
     }
     strOut = strRet;
 
@@ -504,9 +506,16 @@ void htdf::MakeNewKey(unsigned char *key32)
     } while (!Check(key32));
 }
 
-
-int htdf::PubkToAddress(const string& strPubk, string& strAddr)
+string htdf::PubkToAddress(const string &strHexPubk)
 {
-    
-    return 0;
+    CHash160 hash160;
+    vector<unsigned char> pubk = ParseHex(strHexPubk);
+    vector<unsigned char> out(CRIPEMD160::OUTPUT_SIZE);
+    hash160.Write(pubk);
+    hash160.Finalize(out);
+
+    vector<unsigned char> conv;
+    bech32::convertbits<8, 5, true>(conv, out);
+    string strBech32Addr = bech32::encode(STR_HTDF, conv);
+    return strBech32Addr;
 }

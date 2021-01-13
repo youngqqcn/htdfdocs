@@ -1,4 +1,3 @@
-
 #ifndef __CPP_DEMOS_CONSTANT_H__
 #define __CPP_DEMOS_CONSTANT_H__
 

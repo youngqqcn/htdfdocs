@@ -14,7 +14,7 @@ void TestMakeNewKey();
 void TestPubkToAddress();
 void TestBitcoinSHA256();
 void TestBitcoinRipemd160();
-void TestBase64();
+// void TestBase64();
 void TestBech32();
 void TestHex2Bin();
 void TestBitcoinHex2Bin();

@@ -4,7 +4,6 @@ project(cpp_demos)
 
 set(CMAKE_BUILD_TYPE Debug)
 
-# find_package(OpenSSL REQUIRED)
 find_library(secp256k1 libsecp256k1.a)
 
 add_executable(main main.cc 
@@ -13,12 +12,11 @@ add_executable(main main.cc
     rand.cpp 
     htdf/crypto/sha256.cpp 
     htdf/crypto/ripemd160.cpp
-    htdf/base64/base64.cpp
+    # htdf/base64/base64.cpp
     htdf/bech32/bech32.cpp
     htdf/crypto/string.cpp
     htdf/crypto/strencodings.cpp
     )
 
-# target_link_libraries(main libsecp256k1.a OpenSSL::SSL)
 target_link_libraries(main libsecp256k1.a )
 

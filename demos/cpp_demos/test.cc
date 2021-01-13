@@ -1,4 +1,8 @@
-// #include <openssl/sha.h>
+/**
+ * author: yqq
+ * date: 2021-01-12
+ * descriptions: test cases of htdf
+ */
 
 #include "htdf/utils.h"
 #include "htdf/htdf.h"
@@ -13,41 +17,6 @@
 #include "htdf/crypto/strencodings.h"
 
 using namespace std;
-
-// void TestSha256()
-// {
-//     //1.将json转为bytes形式
-//     std::string strTest = "";
-//     unsigned char *pJsonBuf = new unsigned char[strTest.size()];
-//     size_t uBufSize = strTest.size();
-//     memset(pJsonBuf, 0, uBufSize);
-//     memcpy(pJsonBuf, strTest.c_str(), uBufSize);
-
-//     //2.进行sha256哈希
-//     const size_t uSha256Size = 32;
-//     unsigned char *pSha256Out = new unsigned char[uSha256Size]; //32 byte 即可
-//     memset(pSha256Out, 0, uSha256Size);
-//     SHA256(pJsonBuf, uBufSize, pSha256Out);
-
-//     //使用的sha256 对空字符串进行sha256 输出是
-//     //[227 176 196 66 152 252 28 20 154 251 244 200 153 111 185 36 39 174 65 228 100 155 147 76 164 149 153 27 120 82 184 85]
-//     unsigned char uszRight[32] = {227, 176, 196, 66, 152, 252, 28, 20, 154, 251, 244, 200, 153, 111, 185, 36, 39, 174, 65, 228, 100, 155, 147, 76, 164, 149, 153, 27, 120, 82, 184, 85};
-//     if (0 == memcmp(uszRight, pSha256Out, 32))
-//     {
-//         cout << "TestSha256: PASSED\n"
-//              << endl;
-//     }
-//     else
-//     {
-//         cout << "TestSha256: FAILED\\n"
-//              << endl;
-//     }
-
-//     delete[] pSha256Out;
-//     pSha256Out = NULL;
-//     delete[] pJsonBuf;
-//     pJsonBuf = NULL;
-// }
 
 void TestBitcoinSHA256()
 {
@@ -333,21 +302,8 @@ void TestPubkToAddress()
 {
     // private key: 5c9afe978e62a4f9911d0d8314f401c679f6abd2392f16e31256d62604975e15
     string strPubk = "02a5314d3192bbe6dd9dd86465ea1e623cb4af01be99616e5c4838be69aeab8b54";
-    string strAddr = "";
-    htdf::PubkToAddress(strPubk, strAddr);
+    string strAddr = htdf::PubkToAddress(strPubk);
     string strAddress = "htdf106pthht5503w3u96se9utzxl0aq302ya32m6ky";
-
-    CHash160 hash160;
-    string pubk = HexToBin(strPubk);
-    vector<unsigned char> vctPubk(pubk.begin(), pubk.end());
-    vector<unsigned char> vechOut( CRIPEMD160::OUTPUT_SIZE );
-    hash160.Write(vctPubk);
-    hash160.Finalize(vechOut);
-
-    vector<unsigned char> vctConvOut;
-    bech32::convertbits<8, 5, true>(vctConvOut, vechOut);
-    string strBech32Addr = bech32::encode("htdf", vctConvOut);
-    strAddr = strBech32Addr;
 
     if(strAddr == strAddress)
     {
@@ -402,36 +358,20 @@ void TestBitcoinHex2Bin()
 }
 
 
-// void TestOpenSSLBase64()
+// void TestBase64()
 // {
 //     char psz[] = "helloworld";
-//     string b64 = Base64Encode(psz, strlen(psz), false);
+//     string b64 = base64_encode(psz);
 //     string strExpected = "aGVsbG93b3JsZA==";
-//     // cout << b64 << endl;
-//     if(b64 == strExpected)
-//      {
-//         cout << "TestOpenSSLBase64: PASSED" << endl;
+//     if (b64 == strExpected)
+//     {
+//         cout << "TestBase64: PASSED" << endl;
 //     }
 //     else
 //     {
-//         cout << "TestOpenSSLBase64: FAILED"<< b64 << " != " << strExpected  << endl;
+//         cout << "TestBase64: FAILED" << b64 << " != " << strExpected << endl;
 //     }
 // }
-
-void TestBase64()
-{
-    char psz[] = "helloworld";
-    string b64 = base64_encode(psz);
-    string strExpected = "aGVsbG93b3JsZA==";
-    if (b64 == strExpected)
-    {
-        cout << "TestBase64: PASSED" << endl;
-    }
-    else
-    {
-        cout << "TestBase64: FAILED" << b64 << " != " << strExpected << endl;
-    }
-}
 
 void TestBitcoinBase64()
 {

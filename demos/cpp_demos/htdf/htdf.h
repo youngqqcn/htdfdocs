@@ -20,7 +20,6 @@ using namespace std;
 namespace htdf
 {
 
-
     int sign(
         unsigned char *pszIn,
         unsigned int uInLen,
@@ -31,13 +30,11 @@ namespace htdf
         unsigned int *puOutDataLen,
         char *pszErrMsg);
 
-    
-    void MakeNewKey(unsigned char *key32) ;
-
+    void MakeNewKey(unsigned char *key32);
 
     int PrivateKeyToCompressPubKey(const string &strPrivKey, string &strPubKey);
 
-    int PubkToAddress(const string& strPubk, string& strAddr);
+    string PubkToAddress(const string &strPubk);
 
     enum ErrorCode
     {
@@ -46,7 +43,6 @@ namespace htdf
         ECCSIGN_STEP1_ERROR = 1005,
         ECCSIGN_STEP2_ERROR = 1006
     };
-
 
     struct CRawTx
     {
@@ -85,6 +81,6 @@ namespace htdf
         bool toString(string &strRet);
         bool checkParams(string &strErrMsg);
         bool toHexStr(string &strOut);
-    }; 
-} 
+    };
+} // namespace htdf
 #endif // __CPP_DEMOS_HTDF_H_

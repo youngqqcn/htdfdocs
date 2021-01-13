@@ -77,8 +77,8 @@ inline string HexToBin(const string &strHexIn)
     if (strHexIn.size() % 2 != 0)
         return "";
 
-    string strHex = strHexIn ;
-    if(0 == strHexIn.find("0x"))
+    string strHex = strHexIn;
+    if (0 == strHexIn.find("0x"))
         strHex = strHexIn.substr(2);
 
     string strBin;
@@ -112,7 +112,6 @@ inline string HexToBin(const string &strHexIn)
     return strBin;
 }
 
-
 inline bool Bech32AddrToHexStrAddr(const std::string &strBech32AddrIn, std::string &strHexStrAddrOut) noexcept(false)
 {
     std::string strErrMsg = "";
@@ -143,17 +142,29 @@ inline bool Bech32AddrToHexStrAddr(const std::string &strBech32AddrIn, std::stri
     return true;
 }
 
-
 static void GetRandom32Bytes(unsigned char *rand32)
 {
-    typedef std::random_device::result_type rtype ;
+    typedef std::random_device::result_type rtype;
     std::random_device rd;
     static const int bsize = 32;
-    static_assert( (bsize % sizeof(rtype)) == 0);
-    for(int i = 0; i < bsize/sizeof(rtype); i++)
+    static_assert((bsize % sizeof(rtype)) == 0);
+    for (int i = 0; i < bsize / sizeof(rtype); i++)
     {
-        *((rtype *)(rand32 + i*sizeof(rtype))) = rd();
+        *((rtype *)(rand32 + i * sizeof(rtype))) = rd();
     }
+}
+
+inline std::string RemoveSpace(const std::string &str, const std::string &pattern = " \f\n\r\t\v")
+{
+    string ret;
+    for (size_t i = 0; i < str.size(); i++)
+    {
+        if (string::npos == pattern.find(str[i]))
+        {
+            ret.push_back(str[i]);
+        }
+    }
+    return ret;
 }
 
 #endif // __CPP_DEMOS_UTILS_H__
