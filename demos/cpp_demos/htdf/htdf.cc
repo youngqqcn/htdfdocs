@@ -10,6 +10,7 @@ descriptions: htdf transaction signature
 
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
+#include "crypto/strencodings.h"
 
 using namespace htdf;
 
@@ -441,7 +442,8 @@ bool CBroadcastTx::checkParams(string &strErrMsg)
     }
 
     string strTmpDecode;
-    strTmpDecode = Base64Decode(strPubkeyValue.data(), strPubkeyValue.size(), false);
+    
+    strTmpDecode = DecodeBase64(strPubkeyValue);
     if (UINT_PUB_KEY_LEN != strTmpDecode.size())
     {
         strErrMsg = boost::str(boost::format("invalid `pub_key value` length %d is not %d. After base64 decode, pubkey's length must be %d.") % strTmpDecode.size() % UINT_PUB_KEY_LEN % UINT_PUB_KEY_LEN);
@@ -449,7 +451,7 @@ bool CBroadcastTx::checkParams(string &strErrMsg)
     }
 
     strTmpDecode.clear();
-    strTmpDecode = Base64Decode(strSignature.data(), strSignature.size(), false);
+    strTmpDecode = DecodeBase64(strSignature);
     if (UINT_SIG_RS_LEN != strTmpDecode.size())
     {
         strErrMsg = boost::str(boost::format("invalid `signature` length is not %d. After base64 decode, signature's length must be %d.") % UINT_SIG_RS_LEN % UINT_SIG_RS_LEN);

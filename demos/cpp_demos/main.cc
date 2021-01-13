@@ -9,21 +9,19 @@ descriptions: implement demo for c++
 
 int main(int argc, char const *argv[])
 {
-    // TestSha256();
-    // TestBuildAndSingTx();
-    // TestHtdfRawTx();
-    // TestBroadcastTx();
-    // TestPrivKeyToPubKeyCompress();
-    // TestGetOsRand();
-    // TestCpp11Random();
-    // TestMakeNewKey();
-    // TestPubkToAddress();
-    // TestBitcoinSHA256();
-    // TestBitcoinRipemd160();
-    // TestOpenSSLBase64();
-    // TestBase64();
-    // TestBech32();
-    // TestHex2Bin();
-    // TestBitcoinHex2Bin();
+    TestBuildAndSingTx();
+    TestHtdfRawTx();
+    TestBroadcastTx();
+    TestPrivKeyToPubKeyCompress();
+    TestGetOsRand();
+    TestCpp11Random();
+    TestMakeNewKey();
+    TestPubkToAddress();
+    TestBitcoinSHA256();
+    TestBitcoinRipemd160();
+    TestBase64();
+    TestBech32();
+    TestHex2Bin();
+    TestBitcoinHex2Bin();
     TestBitcoinBase64();
 }

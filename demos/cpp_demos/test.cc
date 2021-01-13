@@ -1,4 +1,4 @@
-#include <openssl/sha.h>
+// #include <openssl/sha.h>
 
 #include "htdf/utils.h"
 #include "htdf/htdf.h"
@@ -14,40 +14,40 @@
 
 using namespace std;
 
-void TestSha256()
-{
-    //1.将json转为bytes形式
-    std::string strTest = "";
-    unsigned char *pJsonBuf = new unsigned char[strTest.size()];
-    size_t uBufSize = strTest.size();
-    memset(pJsonBuf, 0, uBufSize);
-    memcpy(pJsonBuf, strTest.c_str(), uBufSize);
+// void TestSha256()
+// {
+//     //1.将json转为bytes形式
+//     std::string strTest = "";
+//     unsigned char *pJsonBuf = new unsigned char[strTest.size()];
+//     size_t uBufSize = strTest.size();
+//     memset(pJsonBuf, 0, uBufSize);
+//     memcpy(pJsonBuf, strTest.c_str(), uBufSize);
 
-    //2.进行sha256哈希
-    const size_t uSha256Size = 32;
-    unsigned char *pSha256Out = new unsigned char[uSha256Size]; //32 byte 即可
-    memset(pSha256Out, 0, uSha256Size);
-    SHA256(pJsonBuf, uBufSize, pSha256Out);
+//     //2.进行sha256哈希
+//     const size_t uSha256Size = 32;
+//     unsigned char *pSha256Out = new unsigned char[uSha256Size]; //32 byte 即可
+//     memset(pSha256Out, 0, uSha256Size);
+//     SHA256(pJsonBuf, uBufSize, pSha256Out);
 
-    //使用的sha256 对空字符串进行sha256 输出是
-    //[227 176 196 66 152 252 28 20 154 251 244 200 153 111 185 36 39 174 65 228 100 155 147 76 164 149 153 27 120 82 184 85]
-    unsigned char uszRight[32] = {227, 176, 196, 66, 152, 252, 28, 20, 154, 251, 244, 200, 153, 111, 185, 36, 39, 174, 65, 228, 100, 155, 147, 76, 164, 149, 153, 27, 120, 82, 184, 85};
-    if (0 == memcmp(uszRight, pSha256Out, 32))
-    {
-        cout << "TestSha256: PASSED\n"
-             << endl;
-    }
-    else
-    {
-        cout << "TestSha256: FAILED\\n"
-             << endl;
-    }
+//     //使用的sha256 对空字符串进行sha256 输出是
+//     //[227 176 196 66 152 252 28 20 154 251 244 200 153 111 185 36 39 174 65 228 100 155 147 76 164 149 153 27 120 82 184 85]
+//     unsigned char uszRight[32] = {227, 176, 196, 66, 152, 252, 28, 20, 154, 251, 244, 200, 153, 111, 185, 36, 39, 174, 65, 228, 100, 155, 147, 76, 164, 149, 153, 27, 120, 82, 184, 85};
+//     if (0 == memcmp(uszRight, pSha256Out, 32))
+//     {
+//         cout << "TestSha256: PASSED\n"
+//              << endl;
+//     }
+//     else
+//     {
+//         cout << "TestSha256: FAILED\\n"
+//              << endl;
+//     }
 
-    delete[] pSha256Out;
-    pSha256Out = NULL;
-    delete[] pJsonBuf;
-    pJsonBuf = NULL;
-}
+//     delete[] pSha256Out;
+//     pSha256Out = NULL;
+//     delete[] pJsonBuf;
+//     pJsonBuf = NULL;
+// }
 
 void TestBitcoinSHA256()
 {
@@ -226,9 +226,12 @@ void TestBuildAndSingTx()
         std::cout << "json 对比失败 !" << std::endl;
     }
 
-    unsigned char uszShaData[256 / 8] = {0};
+    unsigned char uszShaData[CSHA256::OUTPUT_SIZE] = {0};
     memset(uszShaData, 0, sizeof(uszShaData));
-    SHA256((unsigned char *)strOut.data(), strOut.size(), uszShaData);
+    // SHA256((unsigned char *)strOut.data(), strOut.size(), uszShaData);
+    CSHA256 sh256;
+    sh256.Write((unsigned char *)strOut.data(), strOut.size());
+    sh256.Finalize(uszShaData);
 
     std::string strSha256 = Bin2HexStr(uszShaData, sizeof(uszShaData));
     std::cout << "sha256 output: " << std::endl
@@ -399,21 +402,21 @@ void TestBitcoinHex2Bin()
 }
 
 
-void TestOpenSSLBase64()
-{
-    char psz[] = "helloworld";
-    string b64 = Base64Encode(psz, strlen(psz), false);
-    string strExpected = "aGVsbG93b3JsZA==";
-    // cout << b64 << endl;
-    if(b64 == strExpected)
-     {
-        cout << "TestOpenSSLBase64: PASSED" << endl;
-    }
-    else
-    {
-        cout << "TestOpenSSLBase64: FAILED"<< b64 << " != " << strExpected  << endl;
-    }
-}
+// void TestOpenSSLBase64()
+// {
+//     char psz[] = "helloworld";
+//     string b64 = Base64Encode(psz, strlen(psz), false);
+//     string strExpected = "aGVsbG93b3JsZA==";
+//     // cout << b64 << endl;
+//     if(b64 == strExpected)
+//      {
+//         cout << "TestOpenSSLBase64: PASSED" << endl;
+//     }
+//     else
+//     {
+//         cout << "TestOpenSSLBase64: FAILED"<< b64 << " != " << strExpected  << endl;
+//     }
+// }
 
 void TestBase64()
 {
