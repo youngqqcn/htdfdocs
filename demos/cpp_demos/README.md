@@ -26,6 +26,6 @@ cd cpp_demos
 mkdir build && cd build
 cmake ../
 make
-./main
+./test
 ```
 
