@@ -70,7 +70,7 @@ int htdf::sign(
         return htdf::ARGS_ERROR;
     }
 
-    auto *ctx = getCtx();
+    auto *ctx = GetSecp256k1Ctx();
 
     secp256k1_ecdsa_recoverable_signature rawSig;
     memset(&rawSig.data, 0, 65);
@@ -95,25 +95,24 @@ int htdf::sign(
 
 //输入: 十六进制字符串形式的私钥
 //输出: 十六进制字符串形式的公钥
-int htdf::PrivateKeyToCompressPubKey(const string &_strPrivKey, string &strPubKey)
+int htdf::PrivateKeyToCompressPubKey(const string &strPrivKey, string &strPubKey)
 {
-    string strPrivKey = HexToBin(_strPrivKey);
-
+    const int PUBK_SIZE = 33;
+    string privKey = HexToBin(strPrivKey);
     secp256k1_pubkey pubkey;
     memset(pubkey.data, 0, sizeof(pubkey.data));
 
-    auto *ctx = getCtx();
+    auto *ctx = GetSecp256k1Ctx();
 
-    if (!secp256k1_ec_pubkey_create(ctx, &pubkey, (unsigned char *)strPrivKey.data()))
+    if (!secp256k1_ec_pubkey_create(ctx, &pubkey, (unsigned char *)privKey.data()))
     {
         return 1;
     }
 
-    unsigned char output[1024] = {0};
+    unsigned char output[128] = {0};
     memset(output, 0, sizeof(output));
     size_t outputlen = 33;
     secp256k1_ec_pubkey_serialize(ctx, output, &outputlen, &pubkey, SECP256K1_EC_COMPRESSED);
-
     if (33 != outputlen)
     {
         return 1;
@@ -487,4 +486,25 @@ bool CBroadcastTx::toHexStr(string &strOut)
     strOut = strRet;
 
     return true;
+}
+
+bool Check(const unsigned char *vch)
+{
+    auto *ctx = GetSecp256k1Ctx();
+    return secp256k1_ec_seckey_verify(ctx, vch);
+}
+
+void htdf::MakeNewKey(unsigned char *key32)
+{
+    do
+    {
+        GetRandom32Bytes(key32);
+    } while (!Check(key32));
+}
+
+
+int htdf::PubkToAddress(const string& strPubk, string& strAddr)
+{
+    
+    return 0;
 }

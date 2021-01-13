@@ -11,5 +11,8 @@ void TestBuildAndSingTx();
 void TestPrivKeyToPubKeyCompress();
 
 void TestGetOsRand();
-
+void TestCpp11Random();
+void TestMakeNewKey();
+void TestPubkToAddress();
+void TestBitcoinSHA256();
 #endif //_CPP_DEMOS_TEST_H_

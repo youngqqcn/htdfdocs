@@ -18,11 +18,12 @@
 #include <openssl/bio.h>
 #include <openssl/buffer.h>
 #include <memory>
+#include <random> // for std::random_device
 #include "bech32/bech32.h"
 
 using namespace std;
 
-inline secp256k1_context const *getCtx()
+inline secp256k1_context const *GetSecp256k1Ctx()
 {
     static std::unique_ptr<secp256k1_context, decltype(&secp256k1_context_destroy)> s_ctx{
         secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY),
@@ -195,6 +196,19 @@ inline bool Bech32AddrToHexStrAddr(const std::string &strBech32AddrIn, std::stri
     strHexStrAddrOut = cstrHexRet;
 
     return true;
+}
+
+
+static void GetRandom32Bytes(unsigned char *rand32)
+{
+    typedef std::random_device::result_type rtype ;
+    std::random_device rd;
+    static const int bsize = 32;
+    static_assert( (bsize % sizeof(rtype)) == 0);
+    for(int i = 0; i < bsize/sizeof(rtype); i++)
+    {
+        *((rtype *)(rand32 + i*sizeof(rtype))) = rd();
+    }
 }
 
 #endif // __CPP_DEMOS_UTILS_H__

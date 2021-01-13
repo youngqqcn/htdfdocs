@@ -31,9 +31,13 @@ namespace htdf
         unsigned int *puOutDataLen,
         char *pszErrMsg);
 
-    int PrivateKeyToCompressPubKey(
-        const string &_strPrivKey,
-        string &strPubKey);
+    
+    void MakeNewKey(unsigned char *key32) ;
+
+
+    int PrivateKeyToCompressPubKey(const string &strPrivKey, string &strPubKey);
+
+    int PubkToAddress(const string& strPubk, string& strAddr);
 
     enum ErrorCode
     {
@@ -43,7 +47,6 @@ namespace htdf
         ECCSIGN_STEP2_ERROR = 1006
     };
 
-    int PrivateKeyToCompressPubKey(const string &_strPrivKey, string &strPubKey);
 
     struct CRawTx
     {

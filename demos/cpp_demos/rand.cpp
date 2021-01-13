@@ -6,9 +6,12 @@
 #endif
 #include <stdlib.h>
 
+
+#ifndef WIN32
 #include <unistd.h>
 #include <fcntl.h>
-#include <sys/time.h>
+// #include <sys/time.h>
+#endif
 
 /** Fallback: get 32 bytes of system entropy from /dev/urandom. The most
  * compatible way to get cryptographic randomness on UNIX-ish platforms.

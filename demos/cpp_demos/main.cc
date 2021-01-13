@@ -14,5 +14,9 @@ int main(int argc, char const *argv[])
     // TestHtdfRawTx();
     // TestBroadcastTx();
     // TestPrivKeyToPubKeyCompress();
-    TestGetOsRand();
+    // TestGetOsRand();
+    // TestCpp11Random();
+    // TestMakeNewKey();
+    // TestPubkToAddress();
+    TestBitcoinSHA256();
 }

@@ -5,6 +5,9 @@
 #include "test.h"
 #include "rand.h"
 
+#include <random> // c++11 random
+#include "htdf/crypto/sha256.h"
+
 using namespace std;
 
 void TestSha256()
@@ -41,6 +44,34 @@ void TestSha256()
     delete[] pJsonBuf;
     pJsonBuf = NULL;
 }
+
+void TestBitcoinSHA256()
+{
+    CSHA256 sha256;
+    string strTest = "";
+    string strHash;
+    strHash.resize(32);
+
+    // 空字符串的hash
+    // unsigned char uszRight[32] = {227, 176, 196, 66, 152, 252, 28, 20, 154, 251, 244, 200, 153, 111, 185, 36, 39, 174, 65, 228, 100, 155, 147, 76, 164, 149, 153, 27, 120, 82, 184, 85};
+    // string strExpectedHash =  Bin2HexStr(uszRight, sizeof(uszRight));
+    string strExpectedHash = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"; 
+
+    sha256.Write((const unsigned char *)strTest.data(), strTest.size())
+        .Finalize((unsigned char *)strHash.data());
+    string strHexHash = Bin2HexStr((const unsigned char *)strHash.data(), strHash.size());
+
+    if(strHexHash == strExpectedHash)
+    {
+        cout << "TestBitcoinSHA256: PASSED" << endl;
+    }
+    else
+    {
+        cout << "TestBitcoinSHA256: FAILED,  " << strHexHash << " != " << strExpectedHash << endl;
+    }
+}
+
+
 
 void TestHtdfRawTx()
 {
@@ -252,4 +283,39 @@ void TestGetOsRand()
     }
     string strRand = Bin2HexStr(buf, sizeof(buf));
     cout << "rand = " << strRand << endl;
+}
+
+void TestCpp11Random()
+{
+    // random
+    unsigned char entroy32[32];
+    GetRandom32Bytes(entroy32);
+    string strRand = Bin2HexStr(entroy32, sizeof(entroy32));
+    cout << "rand = " << strRand << endl;
+}
+
+void TestMakeNewKey()
+{
+    unsigned char key[32];
+    htdf::MakeNewKey(key);
+    string strRand = Bin2HexStr(key, sizeof(key));
+    cout << "rand = " << strRand << endl;
+}
+
+
+void TestPubkToAddress()
+{
+    // private key: 5c9afe978e62a4f9911d0d8314f401c679f6abd2392f16e31256d62604975e15
+    string strPubk = "0254f1500ff598d768f51a04472ca15bbadf88cf6f852632b748cdb2a5a6fc6b99";
+    string strAddr = "";
+    htdf::PubkToAddress(strPubk, strAddr);
+    string strAddress = "htdf1f7ajd5nyuk7aammtwpdhyd9yutkdmn2jyrwyf8";
+    if(strAddr == strAddress)
+    {
+        cout << "TestPubkToAddress: PASSED" << endl;
+    }
+    else
+    {
+        cout << "TestPubkToAddress: FAILED"<< strAddr << " != " << strAddress  << endl;
+    }
 }
