@@ -18,6 +18,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#ifndef _CPP_DEMOS_BECH32_H_
+#define _CPP_DEMOS_BECH32_H_
 
 #include <stdint.h>
 #include <vector>
@@ -64,3 +66,6 @@ bool convertbits(data& out, const data& in) {
 }
 
 }
+
+
+#endif // _CPP_DEMOS_BECH32_H_

@@ -7,6 +7,10 @@
 
 #include <random> // c++11 random
 #include "htdf/crypto/sha256.h"
+#include "htdf/base64/base64.h"
+#include "htdf/crypto/hash.h"
+#include "htdf/bech32/bech32.h"
+#include "htdf/crypto/strencodings.h"
 
 using namespace std;
 
@@ -71,7 +75,26 @@ void TestBitcoinSHA256()
     }
 }
 
+void TestBitcoinRipemd160()
+{
+    CRIPEMD160 ripemd160;
+    string strTest = "";
+    string strHash;
+    strHash.resize(CRIPEMD160::OUTPUT_SIZE);
+    ripemd160.Write((const unsigned char *)strTest.data(), strTest.size())
+        .Finalize((unsigned char *)strHash.data());
+    string strHexHash = Bin2HexStr((const unsigned char *)strHash.data(), strHash.size());
+    string strExpectedHash = "9c1185a5c5e9fc54612808977ee8f548b2258d31";
 
+    if (strHexHash == strExpectedHash)
+    {
+        cout << "TestBitcoinSHA256: PASSED" << endl;
+    }
+    else
+    {
+        cout << "TestBitcoinSHA256: FAILED,  " << strHexHash << " != " << strExpectedHash << endl;
+    }
+}
 
 void TestHtdfRawTx()
 {
@@ -306,16 +329,134 @@ void TestMakeNewKey()
 void TestPubkToAddress()
 {
     // private key: 5c9afe978e62a4f9911d0d8314f401c679f6abd2392f16e31256d62604975e15
-    string strPubk = "0254f1500ff598d768f51a04472ca15bbadf88cf6f852632b748cdb2a5a6fc6b99";
+    string strPubk = "02a5314d3192bbe6dd9dd86465ea1e623cb4af01be99616e5c4838be69aeab8b54";
     string strAddr = "";
     htdf::PubkToAddress(strPubk, strAddr);
-    string strAddress = "htdf1f7ajd5nyuk7aammtwpdhyd9yutkdmn2jyrwyf8";
+    string strAddress = "htdf106pthht5503w3u96se9utzxl0aq302ya32m6ky";
+
+    CHash160 hash160;
+    string pubk = HexToBin(strPubk);
+    vector<unsigned char> vctPubk(pubk.begin(), pubk.end());
+    vector<unsigned char> vechOut( CRIPEMD160::OUTPUT_SIZE );
+    hash160.Write(vctPubk);
+    hash160.Finalize(vechOut);
+
+    vector<unsigned char> vctConvOut;
+    bech32::convertbits<8, 5, true>(vctConvOut, vechOut);
+    string strBech32Addr = bech32::encode("htdf", vctConvOut);
+    strAddr = strBech32Addr;
+
     if(strAddr == strAddress)
     {
         cout << "TestPubkToAddress: PASSED" << endl;
     }
     else
     {
-        cout << "TestPubkToAddress: FAILED"<< strAddr << " != " << strAddress  << endl;
+        cout << "TestPubkToAddress: FAILED, "<< strAddr << " != " << strAddress  << endl;
+    }
+}
+
+void TestHex2Bin()
+{
+    string hex = "02a5314d3192bbe6dd9dd86465ea1e623cb4af01be99616e5c4838be69aeab8b54";
+    string bin = HexToBin(hex);
+    unsigned char szExpected[] = {
+        2, 165, 49, 77, 49, 146, 187, 230, 221, 157, 216, 100,
+         101, 234, 30, 98, 60, 180, 175, 1, 
+        190, 153, 97, 110, 92, 72, 56, 190, 105, 174, 171, 139, 84
+    };
+
+    if(0 == memcmp(szExpected, bin.data(), 32) )
+    {
+        cout << "TestHex2Bin: PASSED" << endl;
+    }
+    else 
+    {
+        cout << "TestHex2Bin: FAILED" << endl;
+    }
+}
+
+void TestBitcoinHex2Bin()
+{
+     string hex = "02a5314d3192bbe6dd9dd86465ea1e623cb4af01be99616e5c4838be69aeab8b54";
+    // string bin = HexToBin(hex);
+    auto bin = ParseHex(hex);
+    unsigned char szExpected[] = {
+        2, 165, 49, 77, 49, 146, 187, 230, 221, 157, 216, 100,
+         101, 234, 30, 98, 60, 180, 175, 1, 
+        190, 153, 97, 110, 92, 72, 56, 190, 105, 174, 171, 139, 84
+    };
+
+    if(0 == memcmp(szExpected, bin.data(), 32) )
+    {
+        cout << "TestHex2Bin: PASSED" << endl;
+    }
+    else 
+    {
+        cout << "TestHex2Bin: FAILED" << endl;
+    }
+    
+}
+
+
+void TestOpenSSLBase64()
+{
+    char psz[] = "helloworld";
+    string b64 = Base64Encode(psz, strlen(psz), false);
+    string strExpected = "aGVsbG93b3JsZA==";
+    // cout << b64 << endl;
+    if(b64 == strExpected)
+     {
+        cout << "TestOpenSSLBase64: PASSED" << endl;
+    }
+    else
+    {
+        cout << "TestOpenSSLBase64: FAILED"<< b64 << " != " << strExpected  << endl;
+    }
+}
+
+void TestBase64()
+{
+    char psz[] = "helloworld";
+    string b64 = base64_encode(psz);
+    string strExpected = "aGVsbG93b3JsZA==";
+    if (b64 == strExpected)
+    {
+        cout << "TestBase64: PASSED" << endl;
+    }
+    else
+    {
+        cout << "TestBase64: FAILED" << b64 << " != " << strExpected << endl;
+    }
+}
+
+void TestBitcoinBase64()
+{
+    char psz[] = "helloworld";
+    string b64 = EncodeBase64(psz);
+    string strExpected = "aGVsbG93b3JsZA==";
+    if (b64 == strExpected)
+    {
+        cout << "TestBitcoinBase64: PASSED" << endl;
+    }
+    else
+    {
+        cout << "TestBitcoinBase64: FAILED" << b64 << " != " << strExpected << endl;
+    }
+}
+
+void TestBech32()
+{
+    bech32::data d;
+    d.resize(20);
+    string strExpected = "htdf1qqqqqqqqqqqqqqqqqqqqldl6yp";
+    string strBech32 = bech32::encode("htdf", d);
+    if (strBech32 == strExpected)
+    {
+        cout << "TestBech32: PASSED" << endl;
+    }
+    else
+    {
+        cout << "TestBech32: FAILED" << strBech32 << " != " << strExpected << endl;
     }
 }

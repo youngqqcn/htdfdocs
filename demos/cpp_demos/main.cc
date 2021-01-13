@@ -18,5 +18,12 @@ int main(int argc, char const *argv[])
     // TestCpp11Random();
     // TestMakeNewKey();
     // TestPubkToAddress();
-    TestBitcoinSHA256();
+    // TestBitcoinSHA256();
+    // TestBitcoinRipemd160();
+    // TestOpenSSLBase64();
+    // TestBase64();
+    // TestBech32();
+    // TestHex2Bin();
+    // TestBitcoinHex2Bin();
+    TestBitcoinBase64();
 }

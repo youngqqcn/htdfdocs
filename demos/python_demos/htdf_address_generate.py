@@ -35,10 +35,15 @@ def generate_private_key():
 
 def pubkey_to_address( pubKey,  hrp='htdf'):
     ripemd160 = hashlib.new('ripemd160')
+    print(unhexlify(pubKey))
     ripemd160.update(hashlib.sha256( unhexlify(pubKey)).digest())
     r160data = ripemd160.digest()
+    print("r160data is {}".format( hexlify(r160data)))
     data = [ r160data[i]  for i in range(len(r160data)) ]
-    address = bech32_encode(hrp, convertbits(data, 8, 5))   
+    # address = bech32_encode(hrp, convertbits(data, 8, 5))   
+    convdata = convertbits(data, 8, 5)
+    print('convdata is {}'.format(convdata))
+    address = bech32_encode(hrp, convdata)   
     return address
 
 def gen_addr_from_privkey(priv_key : str) -> str:
@@ -47,7 +52,7 @@ def gen_addr_from_privkey(priv_key : str) -> str:
     return address
 
 def generate_htdf_address(hrp = 'htdf'):
-    privkey = generate_private_key()
+    privkey = 'ae665e902dbc75baf7c93a248b2a6abfdeb7a10aebdb728981590df91009aa65' #generate_private_key()
     pubkey = privkey_to_compress_pubkey(privkey) 
     print("private key: {}".format(privkey))
     print("public key : {}".format(privkey_to_compress_pubkey(privkey) ))

@@ -81,7 +81,9 @@ inline string HexToBin(const string &strHexIn)
     if (strHexIn.size() % 2 != 0)
         return "";
 
-    string strHex = (0 == strHexIn.find_first_of("0x")) ? (strHexIn.substr(2)) : (strHexIn);
+    string strHex = strHexIn ;
+    if(0 == strHexIn.find("0x"))
+        strHex = strHexIn.substr(2);
 
     string strBin;
     strBin.resize(strHex.size() / 2);
@@ -113,6 +115,7 @@ inline string HexToBin(const string &strHexIn)
 
     return strBin;
 }
+
 
 inline std::string Base64Encode(const char *input, int length, bool with_new_line)
 {
