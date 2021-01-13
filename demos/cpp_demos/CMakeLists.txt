@@ -6,15 +6,21 @@ set(CMAKE_BUILD_TYPE Debug)
 
 find_library(secp256k1 libsecp256k1.a)
 
-add_executable(test
-    htdf/test.cc 
-    htdf/htdf.cc 
-    htdf/crypto/sha256.cpp 
-    htdf/crypto/ripemd160.cpp
-    htdf/bech32/bech32.cpp
-    htdf/crypto/string.cpp
-    htdf/crypto/strencodings.cpp
-    )
 
-target_link_libraries(test libsecp256k1.a )
+add_library(htdf htdf/htdf.cpp
+htdf/crypto/sha256.cpp 
+htdf/crypto/ripemd160.cpp
+htdf/bech32/bech32.cpp
+htdf/crypto/string.cpp
+htdf/crypto/strencodings.cpp)
+target_link_libraries(htdf libsecp256k1.a )
+
+add_executable(test htdf/test.cpp  )
+target_link_libraries(test htdf libsecp256k1.a )
+
+add_executable(htdf_address_generate htdf_address_generate.cpp )
+target_link_libraries(htdf_address_generate htdf libsecp256k1.a )
+
+add_executable(htdf_transfer htdf_transfer.cpp )
+target_link_libraries(htdf_transfer htdf libsecp256k1.a )
 
