@@ -14,6 +14,14 @@ descriptions: htdf transaction signature
 #include "crypto/strencodings.h"
 #include "crypto/tinyformat.h"
 #include "crypto/string.h"
+#include "crypto/tinyformat.h"
+
+#include <map>
+
+#include "json.hpp"
+using json = nlohmann::json;
+
+// using Client=httplib::Client;
 
 using namespace htdf;
 
@@ -518,4 +526,178 @@ string htdf::PubkToAddress(const string &strHexPubk)
     bech32::convertbits<8, 5, true>(conv, out);
     string strBech32Addr = bech32::encode(STR_HTDF, conv);
     return strBech32Addr;
+}
+
+CRpc::CRpc(string strNodeHost, string chainid, int port)
+    : _m_pHttp(new httplib::Client(strNodeHost, port)),
+      _m_port(port),
+      _m_host(strNodeHost)
+{
+}
+
+string CRpc::GetURL(ApiName apiName, string arg1, string arg2, string arg3)
+{
+    string url;
+
+    string host = tfm::format("http://%s:%d", _m_host, _m_port);
+    switch (apiName)
+    {
+    case ACCOUNT_INFO:
+        url = tfm::format(host + "/auth/accounts/%s", arg1);
+        break;
+    case BROADCAST:
+        url = tfm::format(host + "/hs/broadcast");
+        break;
+    case TXS:
+        url = tfm::format(host + "/txs/%s", arg1);
+        break;
+    default:
+        break;
+    }
+
+    cout << "URL: " << url << endl;
+    return url;
+}
+
+CActInfo CRpc::GetAccountInfo(string strAddress)
+{
+    CActInfo act;
+    string url = GetURL(ACCOUNT_INFO, strAddress);
+    auto res = _m_pHttp->Get(url.c_str());
+
+    cout << res->body << endl;
+
+    if (200 != res->status)
+    {
+        cerr << "error" << res->status << endl;
+        return act;
+    }
+
+    auto jrsp = json::parse(res->body);
+    act.address = jrsp["value"]["address"];
+    assert(ParseUInt32(jrsp["value"]["account_number"], &act.account_number));
+    assert(ParseUInt64(jrsp["value"]["sequence"], &act.sequence));
+    assert(ParseDouble(jrsp["value"]["coins"][0]["amount"], &act.balance));
+    act.active = true;
+    return act;
+}
+
+string CRpc::GetTransaction(string strTxHash)
+{
+    string url = GetURL(TXS, strTxHash); 
+    auto res = _m_pHttp->Get(url.c_str());
+    // cout << res->body << endl;
+    if (200 != res->status)
+    {
+        cerr << "error" << res->status << endl;
+        return res->body;
+    } 
+    return res->body;
+}
+
+CBroadcastRsp CRpc::Broadcast(string strSignedTx)
+{
+    CBroadcastRsp ret;
+    string tx;
+    string url = GetURL(BROADCAST);
+    
+    // map<string, string> data;
+    string data = tfm::format(R"({"tx":"%s"})", strSignedTx);
+    auto res = _m_pHttp->Post(url.c_str(), data, "application/json");
+    cout << res->body << endl;
+
+    if (200 != res->status)
+    {
+        cerr << "error" << res->status << endl;
+        return ret;
+    } 
+
+    auto jrsp = json::parse(res->body);
+    ret.tx_hash = jrsp["txhash"];
+    // ret.raw_log = jrsp["raw_log"];
+    if(jrsp.contains("raw_log"))
+    {
+        ret.raw_log = jrsp["raw_log"];
+    }
+        
+    return ret;
+}
+
+CTxBuilder::CTxBuilder(
+    string chainid,
+    string from,
+    string to,
+    uint64_t amountSatoshi,
+    uint64_t sequence,
+    uint32_t accountNumber,
+    string memo,
+    string data,
+    uint32_t gasWanted,
+    uint32_t gasPrice)
+    : _m_chainid(chainid), _m_from(from), _m_to(to),
+      _m_sequence(sequence), _m_accountNumber(accountNumber),
+      _m_gasPrice(gasPrice), _m_gasWanted(gasWanted),
+      _m_data(data), _m_amountSatoshi(amountSatoshi)
+{
+}
+
+string CTxBuilder::Build()
+{
+    string ret;
+    CRawTx &rtx = _m_rtx;
+    rtx.uAccountNumber = _m_accountNumber;
+    strcpy(rtx.szChainId, _m_chainid.c_str());
+    strcpy(rtx.szFeeDenom, STR_SATOSHI);
+    strcpy(rtx.szMemo, _m_memo.c_str());
+    strcpy(rtx.szMsgDenom, STR_SATOSHI);
+    strcpy(rtx.szMsgFrom, _m_from.c_str());
+    strcpy(rtx.szMsgTo, _m_to.c_str());
+    rtx.uMsgAmount = _m_amountSatoshi;
+    rtx.uGas = _m_gasWanted;
+    rtx.uFeeAmount = _m_gasPrice;
+    rtx.uSequence = _m_sequence;
+
+    if (rtx.toString(ret))
+    {
+        _m_unsignedTx = ret;
+    }
+    return ret;
+}
+
+string CTxBuilder::Sign(string privateKey)
+{
+    string ret;
+
+    CBroadcastTx& csBTx = _m_csBTx;
+    csBTx.rtx = _m_rtx;
+    csBTx.strType = STR_BROADCAST_TYPE;
+    csBTx.strMsgType = STR_BROADCAST_MSG_TYPE;
+    csBTx.strPubKeyType = STR_BROADCAST_PUB_KEY_TYPE;
+
+    string pubKey;
+    PrivateKeyToCompressPubKey( privateKey, pubKey);
+    csBTx.strPubkeyValue = EncodeBase64(HexToBin(pubKey)); 
+
+    unsigned char uszShaData[CSHA256::OUTPUT_SIZE] = {0};
+    memset(uszShaData, 0, sizeof(uszShaData));
+    CSHA256 sh256;
+    sh256.Write((unsigned char *)_m_unsignedTx.data(), _m_unsignedTx.size());
+    sh256.Finalize(uszShaData);
+
+    std::string strSha256 = Bin2HexStr(uszShaData, sizeof(uszShaData));
+    std::string strPrivKey = HexToBin(privateKey);
+    unsigned char uszSigOut[64] = {0};
+    memset(uszSigOut, 0, sizeof(uszSigOut));
+    unsigned int uSigOutLen = 0;
+    char szMsgBuf[1024] = {0};
+    memset(szMsgBuf, 0, sizeof(szMsgBuf));
+    int iRet = htdf::sign(uszShaData, sizeof(uszShaData), (unsigned char *)strPrivKey.data(), strPrivKey.size(), uszSigOut, sizeof(uszSigOut), &uSigOutLen, szMsgBuf);
+    if (htdf::NO_ERROR != iRet)
+    {
+        return ret;
+    }
+
+    csBTx.strSignature = EncodeBase64(std::move(vector<unsigned char>(uszSigOut, uszSigOut + sizeof(uszSigOut))));  //Bin2HexStr(uszSigOut, uSigOutLen);
+    csBTx.toHexStr(ret);
+    return ret;
 }

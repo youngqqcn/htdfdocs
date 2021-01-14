@@ -363,19 +363,66 @@ void TestBech32()
     }
 }
 
+void TestRpcGetAccountInfo()
+{
+    htdf::CRpc rpc("192.168.0.171", "testchain");
+    string address = "htdf1xwpsq6yqx0zy6grygy7s395e2646wggufqndml";
+    htdf::CActInfo act = rpc.GetAccountInfo(address);
+
+}
+
+
+void TestRpcGetTransaction()
+{
+    htdf::CRpc rpc("192.168.0.171", "testchain");
+    string txhash = "B9A2AE2408556CA2F8BAAFB4E058F53BA62838037CBE5C31BFA984356F98E174";
+    string tx = rpc.GetTransaction(txhash);
+    cout << tx << endl;
+}
+
+void TestRpcBroadcast()
+{
+    htdf::CRpc rpc("192.168.0.171", "testchain");
+    string txdata = "7b2274797065223a22617574682f5374645478222c2276616c7565223a7b226d7367223a5b7b2274797065223a2268746466736572766963652f73656e64222c2276616c7565223a7b2246726f6d223a226874646631787770737136797178307a79366772796779377333393565323634367767677566716e646d6c222c22546f223a2268746466316a7268366b787263723066643867666764776e613879797239746b74393967676d7a396a6132222c22416d6f756e74223a5b7b2264656e6f6d223a227361746f736869222c22616d6f756e74223a223130303030303030227d5d2c2244617461223a22222c224761735072696365223a22313030222c2247617357616e746564223a223330303030227d7d5d2c22666565223a7b226761735f7072696365223a22313030222c226761735f77616e746564223a223330303030227d2c227369676e617475726573223a5b7b227075625f6b6579223a7b2274797065223a2274656e6465726d696e742f5075624b6579536563703235366b31222c2276616c7565223a22412f7448756e637755475a484c784b64657671617364532b444363573866627430537638735270657a715779227d2c227369676e6174757265223a227471535762595a433473654d544d6f6974706c7262556955565735584469313351524e657668474548505638786c64594f5152595a6b57614556567a7847354e465a7a5a71487767643758316436614b4877626939773d3d227d5d2c226d656d6f223a22227d7d";
+    htdf::CBroadcastRsp rsp  = rpc.Broadcast(txdata);
+    cout << rsp.tx_hash << endl;
+}
+
+void TestTxBuilder()
+{
+    htdf::CTxBuilder txBuilder(
+        "testchain",
+        "htdf1xwpsq6yqx0zy6grygy7s395e2646wggufqndml",
+        "htdf1jrh6kxrcr0fd8gfgdwna8yyr9tkt99ggmz9ja2",
+        10000000,
+        10021,//seq
+        6       //acctnumber
+    );
+
+    txBuilder.Build();
+    string signedTx = txBuilder.Sign("279bdcd8dccec91f9e079894da33d6888c0f9ef466c0b200921a1bf1ea7d86e8");
+    cout << signedTx << endl;
+
+
+}
+
 int main(int argc, char const *argv[])
 {
-    TestBuildAndSingTx();
-    TestHtdfRawTx();
-    TestBroadcastTx();
-    TestPrivKeyToPubKeyCompress();
-    TestCpp11Random();
-    TestMakeNewKey();
-    TestPubkToAddress();
-    TestBitcoinSHA256();
-    TestBitcoinRipemd160();
-    TestBech32();
-    TestHex2Bin();
-    TestBitcoinHex2Bin();
-    TestBitcoinBase64();
+    // TestBuildAndSingTx();
+    // TestHtdfRawTx();
+    // TestBroadcastTx();
+    // TestPrivKeyToPubKeyCompress();
+    // TestCpp11Random();
+    // TestMakeNewKey();
+    // TestPubkToAddress();
+    // TestBitcoinSHA256();
+    // TestBitcoinRipemd160();
+    // TestBech32();
+    // TestHex2Bin();
+    // TestBitcoinHex2Bin();
+    // TestBitcoinBase64();
+    // TestRpcGetAccountInfo();
+    TestRpcGetTransaction();
+    // TestRpcBroadcast();
+    // TestTxBuilder();
 }

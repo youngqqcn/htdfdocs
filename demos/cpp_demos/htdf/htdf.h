@@ -15,6 +15,12 @@ decriptions:  HTDF transaction signature wrapper
 #include "utils.h"
 
 #include <secp256k1.h>
+
+#include <mutex>
+
+#include "http/httplib.h" // for http
+#include <memory>
+
 using namespace std;
 
 namespace htdf
@@ -82,5 +88,93 @@ namespace htdf
         bool checkParams(string &strErrMsg);
         bool toHexStr(string &strOut);
     };
+
+    // struct Client;
+    // typedef Client;
+    // using Client=httplib::Client;
+    struct CActInfo;
+    struct CBroadcastRsp;
+    class CRpc 
+    {
+    public:
+        enum ApiName{
+            ACCOUNT_INFO,
+            BROADCAST,
+            TXS,
+        };
+        
+
+        CRpc() = delete;
+        CRpc(CRpc&) = delete;
+        CRpc(CRpc&&) = delete;
+        explicit CRpc(string strNodeHost, string chainid, int port = 1317);
+        CActInfo GetAccountInfo(string strAddress);
+        string GetTransaction(string strTxHash);
+        CBroadcastRsp Broadcast(string strSignedTx);
+    
+    private:
+        string GetURL(ApiName apiName, string arg1="", string arg2="", string arg3="");
+
+    private:
+        int _m_port;
+        string _m_host;
+        mutex _m_mtx;
+        std::shared_ptr<httplib::Client> _m_pHttp;
+    };
+
+    struct CActInfo
+    {
+        string address;
+        uint64_t sequence;
+        uint32_t account_number;
+        double balance;
+        bool active = false;
+    };
+
+    struct CBroadcastRsp
+    {
+        string  tx_hash;
+        // uint64_t  height;
+        string  raw_log;
+    };
+
+    class CTxBuilder
+    {
+    public:
+        CTxBuilder(
+            string chainid,
+            string from,
+            string to,
+            uint64_t amountSatoshi,
+            uint64_t sequence,
+            uint32_t accountNumber,
+            string memo = "",
+            string data = "",
+            uint32_t gasWanted = 30000,
+            uint32_t gasPrice = 100
+            );
+
+        string Build();
+        string Sign(string privateKey);
+
+    private:
+        // string 
+        string _m_unsignedTx;
+        CRawTx _m_rtx;
+        htdf::CBroadcastTx _m_csBTx;
+
+    private:
+        string _m_chainid;
+        string _m_from;
+        string _m_to;
+        uint64_t _m_sequence;
+        uint32_t _m_accountNumber;
+        uint32_t _m_gasPrice;
+        uint32_t _m_gasWanted;
+        string _m_data;
+        string _m_memo;
+        uint64_t _m_amountSatoshi;
+    };
+
 } // namespace htdf
 #endif // __CPP_DEMOS_HTDF_H_

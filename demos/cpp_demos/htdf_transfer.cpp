@@ -2,7 +2,6 @@
 using namespace std;
 
 
-
 int main(int argc, char const *argv[])
 {
     cout << "htdf_transfer demo" << endl;
