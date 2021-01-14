@@ -4,6 +4,10 @@ date: 2019-05-08  14:25
 descriptions: htdf transaction signature 
 ************************************************************************/
 
+#include <map>
+#include <exception>
+#include <ctime>
+
 #include "htdf.h"
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
@@ -16,7 +20,6 @@ descriptions: htdf transaction signature
 #include "crypto/string.h"
 #include "crypto/tinyformat.h"
 
-#include <map>
 
 #include "json.hpp"
 using json = nlohmann::json;
@@ -551,11 +554,17 @@ string CRpc::GetURL(ApiName apiName, string arg1, string arg2, string arg3)
     case TXS:
         url = tfm::format(host + "/txs/%s", arg1);
         break;
+    case LATEST_BLOCK:
+        url = tfm::format(host + "/blocks/latest"); 
+        break;
+    case BLOCK_DETAILS:
+        url = tfm::format(host + "/block_detail/%s", arg1); 
+        break;
     default:
         break;
     }
 
-    cout << "URL: " << url << endl;
+    // cout << "URL: " << url << endl;
     return url;
 }
 
@@ -604,7 +613,7 @@ CBroadcastRsp CRpc::Broadcast(string strSignedTx)
     // map<string, string> data;
     string data = tfm::format(R"({"tx":"%s"})", strSignedTx);
     auto res = _m_pHttp->Post(url.c_str(), data, "application/json");
-    cout << res->body << endl;
+    // cout << res->body << endl;
 
     if (200 != res->status)
     {
@@ -622,6 +631,77 @@ CBroadcastRsp CRpc::Broadcast(string strSignedTx)
         
     return ret;
 }
+
+CBlock CRpc::GetBlock(uint32_t height)
+{
+    CBlock block;
+    string url = GetURL(BLOCK_DETAILS, ToString(height)); 
+    auto res = _m_pHttp->Get(url.c_str());
+    if (200 != res->status)
+    {
+        cerr << "error" << res->status << endl;
+        return block;
+    }
+
+
+    auto jrsp = json::parse(res->body);
+    assert(ParseUInt32(jrsp["block_meta"]["header"]["height"], &block.height) );
+    assert(ParseInt32(jrsp["block_meta"]["header"]["num_txs"], &block.num_txs));
+    block.hash = jrsp["block_meta"]["block_id"]["hash"];
+
+    string strTime = jrsp["block_meta"]["header"]["time"];
+    strTime = strTime.substr(0, strTime.find("."));
+    cout <<"TIME:" << strTime << endl;
+
+    tm ts;
+    strptime(strTime.c_str(), "%Y-%m-%dT%H:%M:%S", &t);
+    time_t tim = mktime(&t);
+    block.blocktime = (long int)tim;
+
+
+    auto txs = jrsp["block"]["txs"];
+    if(!txs.is_null() )
+    {
+        for(size_t i = 0;  i < txs.size(); i++)
+        {
+            auto tx = txs[i];
+            CTx trx;
+            assert( ParseDouble(tx["Amount"][0]["amount"], &trx.amount) );
+            trx.hash = tx["Hash"];
+            trx.from = tx["From"];
+            trx.to = tx["To"];
+            trx.memo = tx["Memo"];
+            trx.data = tx["Data"];
+            trx.txClassify = tx["TxClassify"];
+            trx.txTypeName = tx["TypeName"];
+            block.txs.push_back(std::move(trx));
+        }
+    }
+
+    return block;
+}
+
+CBlock CRpc::GetLatestBlock()
+{
+    CBlock block;
+
+    string url = GetURL(LATEST_BLOCK); 
+    auto res = _m_pHttp->Get(url.c_str());
+    if (200 != res->status)
+    {
+        cerr << "error" << res->status << endl;
+        return block;
+    }
+
+    auto jrsp = json::parse(res->body);
+    uint32_t height;
+    assert(ParseUInt32(jrsp["block_meta"]["header"]["height"], &height) );
+
+    // 'txs' of "/blocks/latest" reponse is not be deserialized,
+    //  so we should get txs by "/block_detail/"
+    return GetBlock(height);
+}
+
 
 CTxBuilder::CTxBuilder(
     string chainid,
@@ -668,15 +748,21 @@ string CTxBuilder::Sign(string privateKey)
 {
     string ret;
 
-    CBroadcastTx& csBTx = _m_csBTx;
+    CBroadcastTx &csBTx = _m_csBTx;
     csBTx.rtx = _m_rtx;
     csBTx.strType = STR_BROADCAST_TYPE;
     csBTx.strMsgType = STR_BROADCAST_MSG_TYPE;
     csBTx.strPubKeyType = STR_BROADCAST_PUB_KEY_TYPE;
 
     string pubKey;
-    PrivateKeyToCompressPubKey( privateKey, pubKey);
-    csBTx.strPubkeyValue = EncodeBase64(HexToBin(pubKey)); 
+    int iret = PrivateKeyToCompressPubKey(privateKey, pubKey);
+    if (0 != iret)
+    {
+        ret = "PrivateKeyToCompressPubKey error";
+        return ret;
+    }
+
+    csBTx.strPubkeyValue = EncodeBase64(HexToBin(pubKey));
 
     unsigned char uszShaData[CSHA256::OUTPUT_SIZE] = {0};
     memset(uszShaData, 0, sizeof(uszShaData));
@@ -689,15 +775,23 @@ string CTxBuilder::Sign(string privateKey)
     unsigned char uszSigOut[64] = {0};
     memset(uszSigOut, 0, sizeof(uszSigOut));
     unsigned int uSigOutLen = 0;
-    char szMsgBuf[1024] = {0};
-    memset(szMsgBuf, 0, sizeof(szMsgBuf));
-    int iRet = htdf::sign(uszShaData, sizeof(uszShaData), (unsigned char *)strPrivKey.data(), strPrivKey.size(), uszSigOut, sizeof(uszSigOut), &uSigOutLen, szMsgBuf);
-    if (htdf::NO_ERROR != iRet)
+    char szErrMsg[256] = {0};
+    memset(szErrMsg, 0, sizeof(szErrMsg));
+
+    int iRet = sign(uszShaData, sizeof(uszShaData),
+                    (unsigned char *)strPrivKey.data(),
+                    strPrivKey.size(),
+                    uszSigOut,
+                    sizeof(uszSigOut),
+                    &uSigOutLen,
+                    szErrMsg);
+    if (NO_ERROR != iRet)
     {
+        ret = string(szErrMsg);
         return ret;
     }
 
-    csBTx.strSignature = EncodeBase64(std::move(vector<unsigned char>(uszSigOut, uszSigOut + sizeof(uszSigOut))));  //Bin2HexStr(uszSigOut, uSigOutLen);
+    csBTx.strSignature = EncodeBase64(Bin2ByteArray(uszSigOut, sizeof(uszSigOut)));
     csBTx.toHexStr(ret);
     return ret;
 }

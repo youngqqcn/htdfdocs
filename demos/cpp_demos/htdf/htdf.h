@@ -94,26 +94,32 @@ namespace htdf
     // using Client=httplib::Client;
     struct CActInfo;
     struct CBroadcastRsp;
-    class CRpc 
+    struct CLatestBlock;
+    struct CBlock;
+    class CRpc
     {
     public:
-        enum ApiName{
-            ACCOUNT_INFO,
-            BROADCAST,
-            TXS,
+        enum ApiName
+        {
+            ACCOUNT_INFO, // GET, get an account info
+            BROADCAST,    // POST, broadcast a signed tx
+            TXS,          // GET, get transaction details by txhash
+            LATEST_BLOCK, // GET, get the latest block info
+            BLOCK_DETAILS // GET, get specially block details
         };
-        
 
         CRpc() = delete;
-        CRpc(CRpc&) = delete;
-        CRpc(CRpc&&) = delete;
+        CRpc(CRpc &) = delete;
+        CRpc(CRpc &&) = delete;
         explicit CRpc(string strNodeHost, string chainid, int port = 1317);
         CActInfo GetAccountInfo(string strAddress);
         string GetTransaction(string strTxHash);
         CBroadcastRsp Broadcast(string strSignedTx);
-    
+        CBlock GetBlock(uint32_t height);
+        CBlock GetLatestBlock();
+
     private:
-        string GetURL(ApiName apiName, string arg1="", string arg2="", string arg3="");
+        string GetURL(ApiName apiName, string arg1 = "", string arg2 = "", string arg3 = "");
 
     private:
         int _m_port;
@@ -136,6 +142,38 @@ namespace htdf
         string  tx_hash;
         // uint64_t  height;
         string  raw_log;
+    };
+
+    // struct CLatestBlock
+    // {
+    //     uint32_t height;
+    //     int num_txs; // transaction count in this block
+    //     string hash;
+    // };
+
+
+    struct CTx
+    {
+        string hash;
+        string from;
+        string to;
+        double amount;
+
+        string memo;
+        string data;
+        uint32_t gasWanted;
+        uint32_t gasPrice;
+        int txClassify;
+        string txTypeName;
+    };
+
+    struct CBlock
+    {
+        uint32_t height;
+        int num_txs;
+        string hash;
+        long int blocktime;
+        vector<CTx> txs;
     };
 
     class CTxBuilder
@@ -175,6 +213,8 @@ namespace htdf
         string _m_memo;
         uint64_t _m_amountSatoshi;
     };
+
+
 
 } // namespace htdf
 #endif // __CPP_DEMOS_HTDF_H_

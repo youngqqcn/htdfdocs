@@ -406,6 +406,23 @@ void TestTxBuilder()
 
 }
 
+void TestGetBlock()
+{
+    htdf::CRpc rpc("192.168.0.171", "testchain");
+    htdf::CBlock blk = rpc.GetBlock(90202);
+    cout << blk.hash << endl;
+    cout << blk.txs.size() << endl;
+}
+
+void TestGetLatestBlock()
+{
+    htdf::CRpc rpc("192.168.0.171", "testchain");
+    htdf::CBlock blk = rpc.GetLatestBlock();
+    cout << blk.hash << endl;
+    cout << blk.txs.size() << endl;
+    cout << blk.blocktime << endl;
+}
+
 int main(int argc, char const *argv[])
 {
     // TestBuildAndSingTx();
@@ -422,7 +439,9 @@ int main(int argc, char const *argv[])
     // TestBitcoinHex2Bin();
     // TestBitcoinBase64();
     // TestRpcGetAccountInfo();
-    TestRpcGetTransaction();
+    // TestRpcGetTransaction();
     // TestRpcBroadcast();
     // TestTxBuilder();
+    // TestGetBlock();
+    TestGetLatestBlock();
 }
