@@ -7,6 +7,7 @@ descriptions: htdf transaction signature
 #include <map>
 #include <exception>
 #include <ctime>
+// #include <time.h>
 
 #include "htdf.h"
 #include <secp256k1.h>
@@ -19,7 +20,6 @@ descriptions: htdf transaction signature
 #include "crypto/tinyformat.h"
 #include "crypto/string.h"
 #include "crypto/tinyformat.h"
-
 
 #include "json.hpp"
 using json = nlohmann::json;
@@ -503,6 +503,50 @@ bool CBroadcastTx::toHexStr(string &strOut)
     return true;
 }
 
+Amount::Amount()
+    : _m_amount(0), _m_amountSatoshi(0)
+{
+}
+
+Amount::Amount(double htdf) : _m_amount(htdf)
+{
+    _m_amountSatoshi = (uint64_t)(htdf * 100000000.0);
+}
+
+Amount::Amount(uint64_t satoshi) : _m_amountSatoshi(satoshi)
+{
+    _m_amount = (double)(satoshi / 100000000.0);
+}
+
+Amount Amount::fromStringHtdf(string htdf)
+{
+    double amount;
+    if (!ParseDouble(htdf, &amount))
+    {
+        amount = 0;
+    }
+    return std::move(Amount(amount));
+}
+Amount Amount::fromStringSatoshi(string satoshi)
+{
+    uint64_t amount;
+    if (!ParseUInt64(satoshi, &amount))
+    {
+        amount = 0;
+    }
+    return std::move(Amount(amount));
+};
+
+double Amount::GetHtdf() const
+{
+    return _m_amount;
+}
+
+uint64_t Amount::GetSatoshi() const
+{
+    return _m_amountSatoshi;
+}
+
 bool Check(const unsigned char *vch)
 {
     auto *ctx = GetSecp256k1Ctx();
@@ -555,10 +599,10 @@ string CRpc::GetURL(ApiName apiName, string arg1, string arg2, string arg3)
         url = tfm::format(host + "/txs/%s", arg1);
         break;
     case LATEST_BLOCK:
-        url = tfm::format(host + "/blocks/latest"); 
+        url = tfm::format(host + "/blocks/latest");
         break;
     case BLOCK_DETAILS:
-        url = tfm::format(host + "/block_detail/%s", arg1); 
+        url = tfm::format(host + "/block_detail/%s", arg1);
         break;
     default:
         break;
@@ -591,51 +635,79 @@ CActInfo CRpc::GetAccountInfo(string strAddress)
     return act;
 }
 
-string CRpc::GetTransaction(string strTxHash)
+CTx CRpc::GetTransaction(string strTxHash)
 {
-    string url = GetURL(TXS, strTxHash); 
+    CTx tx;
+    string url = GetURL(TXS, strTxHash);
     auto res = _m_pHttp->Get(url.c_str());
     // cout << res->body << endl;
     if (200 != res->status)
     {
         cerr << "error" << res->status << endl;
-        return res->body;
-    } 
-    return res->body;
+        return tx;
+    }
+
+    auto jrsp = json::parse(res->body);
+
+    auto logs = jrsp["logs"][0];
+    tx.log = logs["log"];
+    tx.success = logs["success"];
+    assert(ParseUInt32(jrsp["height"], &tx.height));
+    tx.hash = jrsp["txhash"];
+    assert(ParseUInt32(jrsp["gas_used"], &tx.gasUsed));
+    auto txv = jrsp["tx"]["value"];
+    tx.timstamp = jrsp["timestamp"];
+
+    auto msg = txv["msg"][0]; // we only handle single msg, do not handle multiple msg
+    tx.msgType = msg["type"];
+    auto msgValue = msg["value"];
+    if ("htdfservice/send" == tx.msgType )
+    {
+        tx.from = msgValue["From"];
+        tx.to = msgValue["To"];
+        tx.amount = Amount::fromStringSatoshi(msgValue["Amount"][0]["amount"]);
+        tx.data = msgValue["Data"];
+        assert(ParseUInt32(msgValue["GasPrice"], &tx.gasPrice));
+        assert(ParseUInt32(msgValue["GasWanted"], &tx.gasWanted));
+    }
+    else
+    {
+        // TODO: parse other msg type
+    }
+
+    tx.memo = txv["memo"];
+    return std::move(tx);
 }
 
 CBroadcastRsp CRpc::Broadcast(string strSignedTx)
 {
     CBroadcastRsp ret;
-    string tx;
     string url = GetURL(BROADCAST);
-    
-    // map<string, string> data;
+
     string data = tfm::format(R"({"tx":"%s"})", strSignedTx);
     auto res = _m_pHttp->Post(url.c_str(), data, "application/json");
-    // cout << res->body << endl;
 
     if (200 != res->status)
     {
         cerr << "error" << res->status << endl;
         return ret;
-    } 
+    }
 
     auto jrsp = json::parse(res->body);
     ret.tx_hash = jrsp["txhash"];
     // ret.raw_log = jrsp["raw_log"];
-    if(jrsp.contains("raw_log"))
+    if (jrsp.contains("raw_log"))
     {
         ret.raw_log = jrsp["raw_log"];
     }
-        
+
     return ret;
 }
 
 CBlock CRpc::GetBlock(uint32_t height)
 {
     CBlock block;
-    string url = GetURL(BLOCK_DETAILS, ToString(height)); 
+    string url = GetURL(BLOCK_DETAILS, ToString(height));
     auto res = _m_pHttp->Get(url.c_str());
     if (200 != res->status)
     {
@@ -643,49 +715,46 @@ CBlock CRpc::GetBlock(uint32_t height)
         return block;
     }
 
-
     auto jrsp = json::parse(res->body);
-    assert(ParseUInt32(jrsp["block_meta"]["header"]["height"], &block.height) );
+    assert(ParseUInt32(jrsp["block_meta"]["header"]["height"], &block.height));
     assert(ParseInt32(jrsp["block_meta"]["header"]["num_txs"], &block.num_txs));
     block.hash = jrsp["block_meta"]["block_id"]["hash"];
 
     string strTime = jrsp["block_meta"]["header"]["time"];
     strTime = strTime.substr(0, strTime.find("."));
-    cout <<"TIME:" << strTime << endl;
+    strTime = strTime.replace(strTime.find("T"), 1, " ");
+    block.blocktime = strTime;
 
-    tm ts;
-    strptime(strTime.c_str(), "%Y-%m-%dT%H:%M:%S", &t);
-    time_t tim = mktime(&t);
-    block.blocktime = (long int)tim;
-
+    // tm ts;
+    // memset(&ts, 0, sizeof(ts));
+    // char *pret = strptime(strTime.c_str(), "%Y-%m-%d %H:%M:%S", &ts);
+    // cerr << "strptime error" << pret << endl;
+    // time_t tim = mktime(&ts);
+    // cout << tim << endl;
+    // block.blocktime = (int64_t)tim;
+    // cout << "blocktime:" << block.blocktime << endl;
 
     auto txs = jrsp["block"]["txs"];
-    if(!txs.is_null() )
+    if (!txs.is_null())
     {
-        for(size_t i = 0;  i < txs.size(); i++)
+        for (size_t i = 0; i < txs.size(); i++)
         {
             auto tx = txs[i];
-            CTx trx;
-            assert( ParseDouble(tx["Amount"][0]["amount"], &trx.amount) );
-            trx.hash = tx["Hash"];
-            trx.from = tx["From"];
-            trx.to = tx["To"];
-            trx.memo = tx["Memo"];
-            trx.data = tx["Data"];
-            trx.txClassify = tx["TxClassify"];
-            trx.txTypeName = tx["TypeName"];
-            block.txs.push_back(std::move(trx));
+
+            // Because we could not get tx status from block response
+            // So we get the transaction details by API `/txs/{tx_hash}`
+            block.txs.push_back(std::move(GetTransaction(tx["Hash"])));
         }
     }
 
-    return block;
+    return std::move(block);
 }
 
 CBlock CRpc::GetLatestBlock()
 {
     CBlock block;
 
-    string url = GetURL(LATEST_BLOCK); 
+    string url = GetURL(LATEST_BLOCK);
     auto res = _m_pHttp->Get(url.c_str());
     if (200 != res->status)
     {
@@ -695,13 +764,12 @@ CBlock CRpc::GetLatestBlock()
 
     auto jrsp = json::parse(res->body);
     uint32_t height;
-    assert(ParseUInt32(jrsp["block_meta"]["header"]["height"], &height) );
+    assert(ParseUInt32(jrsp["block_meta"]["header"]["height"], &height));
 
     // 'txs' of "/blocks/latest" reponse is not be deserialized,
     //  so we should get txs by "/block_detail/"
     return GetBlock(height);
 }
-
 
 CTxBuilder::CTxBuilder(
     string chainid,
@@ -794,4 +862,37 @@ string CTxBuilder::Sign(string privateKey)
     csBTx.strSignature = EncodeBase64(Bin2ByteArray(uszSigOut, sizeof(uszSigOut)));
     csBTx.toHexStr(ret);
     return ret;
+}
+
+
+string CTx::ToString() const
+{
+    return tfm::format(
+        "hash:%s\n"
+        "from:%s\n"
+        "to:%s\n"
+        "amount:%s htdf\n"
+        "memo:%s\n"
+        "data:%s\n"
+        "gasWanted:%u\n"
+        "gasPrice:%u\n"
+        "gasUsed:%u\n"
+        "height:%u\n"
+        "timestamp:%s\n"
+        "success:%d\n"
+        "log:%s\n"
+        "msgtype:%s\n"
+        ,hash, from, to, amount.GetHtdf(),
+        memo, data, gasWanted, gasPrice, gasUsed, 
+        height, timstamp, (success)?("true"):("false"),
+        log, msgType
+    );
+}
+
+ostream& operator << (ostream& os, const htdf::CTx &tx)
+{
+    os << "===============" << endl;
+    os << tx.ToString();
+    os << "===============" << endl;
+    return os;
 }

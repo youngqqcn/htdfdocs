@@ -4,6 +4,7 @@
  * descriptions: test cases of htdf
  */
 
+#include <ctime>
 #include <random> // c++11 random
 #include "crypto/sha256.h"
 #include "base64/base64.h"
@@ -15,13 +16,12 @@
 
 using namespace std;
 
-#define RESET   "\033[0m"
-#define RED     "\033[31m"      /* Red */
-#define GREEN   "\033[32m"      /* Green */
+#define RESET "\033[0m"
+#define RED "\033[31m"   /* Red */
+#define GREEN "\033[32m" /* Green */
 
-#define  LOG_PASSED cout << GREEN << __FUNCTION__ << "\t: PASSED" << RESET << endl
-#define  LOG_FAILED cout << RED << __FUNCTION__ << ": FAILED," 
-
+#define LOG_PASSED cout << GREEN << __FUNCTION__ << "\t: PASSED" << RESET << endl
+#define LOG_FAILED cout << RED << __FUNCTION__ << ": FAILED,"
 
 void TestBitcoinSHA256()
 {
@@ -154,7 +154,7 @@ void TestBroadcastTx()
     }
     else
     {
-        LOG_FAILED << strHex << " != " <<  strHexRight << std::endl;
+        LOG_FAILED << strHex << " != " << strHexRight << std::endl;
     }
 }
 
@@ -183,7 +183,7 @@ void TestBuildAndSingTx()
     std::string strOut;
     if (false == rtx.toString(strOut))
     {
-        LOG_FAILED<< strOut << std::endl;
+        LOG_FAILED << strOut << std::endl;
         return;
     }
 
@@ -191,7 +191,7 @@ void TestBuildAndSingTx()
     std::string strJsonRight = R"({"account_number":"11","chain_id":"testchain","fee":{"gas_price":"100","gas_wanted":"200000"},"memo":"yqq","msgs":[{"Amount":[{"amount":"12345678","denom":"satoshi"}],"Data":"","From":"htdf1jrh6kxrcr0fd8gfgdwna8yyr9tkt99ggmz9ja2","GasPrice":100,"GasWanted":200000,"To":"htdf1m5phsvgrwpxdsmah5cqkvd6ffz9xzrc3e0jkr2"}],"sequence":"8"})";
     if (strJsonRight != strOut)
     {
-        LOG_FAILED<< strOut << " != " << strJsonRight << std::endl;
+        LOG_FAILED << strOut << " != " << strJsonRight << std::endl;
         return;
     }
 
@@ -211,10 +211,9 @@ void TestBuildAndSingTx()
     string strEpectedSha256 = "d9971bb7d8c24fd45ac86efe0f560511cac5cab8bc779de8a9841918d458dc12";
     if (strSha256 != strEpectedSha256)
     {
-        LOG_FAILED << strSha256 << "!= " <<  strEpectedSha256 << std::endl;
+        LOG_FAILED << strSha256 << "!= " << strEpectedSha256 << std::endl;
         return;
     }
-    
 
     std::string strPrivKey = HexToBin(std::string("485de9a2ee4ed834272389617da915da9176bd5281ec5d261256e15be0c375f2"));
     unsigned char uszSigOut[64] = {0};
@@ -225,12 +224,11 @@ void TestBuildAndSingTx()
     int iRet = htdf::sign(uszShaData, sizeof(uszShaData), (unsigned char *)strPrivKey.data(), strPrivKey.size(), uszSigOut, sizeof(uszSigOut), &uSigOutLen, szMsgBuf);
     if (htdf::NO_ERROR != iRet)
     {
-        LOG_FAILED<< iRet << std::endl;
+        LOG_FAILED << iRet << std::endl;
         return;
     }
     std::string strTmpSig = Bin2HexStr(uszSigOut, uSigOutLen);
 
-  
     string strExpectedSig = "9f670ff17ef97d3d9dbf35b7bbbcd9b6c21a475c134eb4f8ae2abb10ddcb60a606b19edcd59ca8f388730c450b9fc88d57b2a0566bc71630cca3093b4aff3bb3";
     if (strTmpSig == strExpectedSig)
     {
@@ -238,7 +236,7 @@ void TestBuildAndSingTx()
     }
     else
     {
-        LOG_FAILED <<  std::endl ;
+        LOG_FAILED << std::endl;
     }
 }
 
@@ -253,7 +251,7 @@ void TestPrivKeyToPubKeyCompress()
     }
     else
     {
-        LOG_FAILED<< endl;
+        LOG_FAILED << endl;
     }
 }
 
@@ -289,7 +287,7 @@ void TestPubkToAddress()
     }
     else
     {
-        LOG_FAILED<< strAddr << " != " << strAddress << endl;
+        LOG_FAILED << strAddr << " != " << strAddress << endl;
     }
 }
 
@@ -308,7 +306,7 @@ void TestHex2Bin()
     }
     else
     {
-        LOG_FAILED<< endl;
+        LOG_FAILED << endl;
     }
 }
 
@@ -328,7 +326,7 @@ void TestBitcoinHex2Bin()
     }
     else
     {
-       LOG_FAILED<< endl;
+        LOG_FAILED << endl;
     }
 }
 
@@ -343,7 +341,7 @@ void TestBitcoinBase64()
     }
     else
     {
-        LOG_FAILED<< b64 << " != " << strExpected << endl;
+        LOG_FAILED << b64 << " != " << strExpected << endl;
     }
 }
 
@@ -368,24 +366,46 @@ void TestRpcGetAccountInfo()
     htdf::CRpc rpc("192.168.0.171", "testchain");
     string address = "htdf1xwpsq6yqx0zy6grygy7s395e2646wggufqndml";
     htdf::CActInfo act = rpc.GetAccountInfo(address);
-
+    if (act.active)
+    {
+        LOG_PASSED;
+    }
+    else
+    {
+        LOG_FAILED << address << " not found" << endl;
+    }
 }
-
 
 void TestRpcGetTransaction()
 {
     htdf::CRpc rpc("192.168.0.171", "testchain");
     string txhash = "B9A2AE2408556CA2F8BAAFB4E058F53BA62838037CBE5C31BFA984356F98E174";
-    string tx = rpc.GetTransaction(txhash);
-    cout << tx << endl;
+    auto tx = rpc.GetTransaction(txhash);
+    // cout << tx << endl;
+    if (tx.success)
+    {
+        LOG_PASSED;
+    }
+    else
+    {
+        LOG_FAILED << txhash << " not found" << endl;
+    }
 }
 
 void TestRpcBroadcast()
 {
-    htdf::CRpc rpc("192.168.0.171", "testchain");
-    string txdata = "7b2274797065223a22617574682f5374645478222c2276616c7565223a7b226d7367223a5b7b2274797065223a2268746466736572766963652f73656e64222c2276616c7565223a7b2246726f6d223a226874646631787770737136797178307a79366772796779377333393565323634367767677566716e646d6c222c22546f223a2268746466316a7268366b787263723066643867666764776e613879797239746b74393967676d7a396a6132222c22416d6f756e74223a5b7b2264656e6f6d223a227361746f736869222c22616d6f756e74223a223130303030303030227d5d2c2244617461223a22222c224761735072696365223a22313030222c2247617357616e746564223a223330303030227d7d5d2c22666565223a7b226761735f7072696365223a22313030222c226761735f77616e746564223a223330303030227d2c227369676e617475726573223a5b7b227075625f6b6579223a7b2274797065223a2274656e6465726d696e742f5075624b6579536563703235366b31222c2276616c7565223a22412f7448756e637755475a484c784b64657671617364532b444363573866627430537638735270657a715779227d2c227369676e6174757265223a227471535762595a433473654d544d6f6974706c7262556955565735584469313351524e657668474548505638786c64594f5152595a6b57614556567a7847354e465a7a5a71487767643758316436614b4877626939773d3d227d5d2c226d656d6f223a22227d7d";
-    htdf::CBroadcastRsp rsp  = rpc.Broadcast(txdata);
-    cout << rsp.tx_hash << endl;
+    // htdf::CRpc rpc("192.168.0.171", "testchain");
+    // string txdata = "7b2274797065223a22617574682f5374645478222c2276616c7565223a7b226d7367223a5b7b2274797065223a2268746466736572766963652f73656e64222c2276616c7565223a7b2246726f6d223a226874646631787770737136797178307a79366772796779377333393565323634367767677566716e646d6c222c22546f223a2268746466316a7268366b787263723066643867666764776e613879797239746b74393967676d7a396a6132222c22416d6f756e74223a5b7b2264656e6f6d223a227361746f736869222c22616d6f756e74223a223130303030303030227d5d2c2244617461223a22222c224761735072696365223a22313030222c2247617357616e746564223a223330303030227d7d5d2c22666565223a7b226761735f7072696365223a22313030222c226761735f77616e746564223a223330303030227d2c227369676e617475726573223a5b7b227075625f6b6579223a7b2274797065223a2274656e6465726d696e742f5075624b6579536563703235366b31222c2276616c7565223a22412f7448756e637755475a484c784b64657671617364532b444363573866627430537638735270657a715779227d2c227369676e6174757265223a227471535762595a433473654d544d6f6974706c7262556955565735584469313351524e657668474548505638786c64594f5152595a6b57614556567a7847354e465a7a5a71487767643758316436614b4877626939773d3d227d5d2c226d656d6f223a22227d7d";
+    // htdf::CBroadcastRsp rsp = rpc.Broadcast(txdata);
+    // cout << rsp.tx_hash << endl;
+    // if (!rsp.tx_hash.empty())
+    // {
+    //     LOG_PASSED;
+    // }
+    // else
+    // {
+    //     LOG_FAILED << " broadcast failed." << endl;
+    // }
 }
 
 void TestTxBuilder()
@@ -395,32 +415,53 @@ void TestTxBuilder()
         "htdf1xwpsq6yqx0zy6grygy7s395e2646wggufqndml",
         "htdf1jrh6kxrcr0fd8gfgdwna8yyr9tkt99ggmz9ja2",
         10000000,
-        10021,//seq
-        6       //acctnumber
+        10021, //seq
+        6      //acctnumber
     );
 
     txBuilder.Build();
     string signedTx = txBuilder.Sign("279bdcd8dccec91f9e079894da33d6888c0f9ef466c0b200921a1bf1ea7d86e8");
-    cout << signedTx << endl;
-
-
+    // cout << signedTx << endl;
+    LOG_PASSED;
 }
 
 void TestGetBlock()
 {
     htdf::CRpc rpc("192.168.0.171", "testchain");
     htdf::CBlock blk = rpc.GetBlock(90202);
-    cout << blk.hash << endl;
-    cout << blk.txs.size() << endl;
+    // cout << blk.hash << endl;
+    // cout << blk.txs.size() << endl;
+
+    // for( auto &tx : blk.txs)
+    // {
+    //     // cout << tx.ToString() << endl;
+    //     cout << tx << endl;
+    // }
+    if (!blk.empty())
+    {
+        LOG_PASSED;
+    }
+    else
+    {
+        LOG_FAILED << " GET block failed." << endl;
+    }
 }
 
 void TestGetLatestBlock()
 {
     htdf::CRpc rpc("192.168.0.171", "testchain");
     htdf::CBlock blk = rpc.GetLatestBlock();
-    cout << blk.hash << endl;
-    cout << blk.txs.size() << endl;
-    cout << blk.blocktime << endl;
+    // cout << blk.hash << endl;
+    // cout << blk.txs.size() << endl;
+    // cout << blk.blocktime << endl;
+    if (!blk.empty())
+    {
+        LOG_PASSED;
+    }
+    else
+    {
+        LOG_FAILED << " GET latest block failed." << endl;
+    }
 }
 
 int main(int argc, char const *argv[])
@@ -439,9 +480,9 @@ int main(int argc, char const *argv[])
     // TestBitcoinHex2Bin();
     // TestBitcoinBase64();
     // TestRpcGetAccountInfo();
-    // TestRpcGetTransaction();
-    // TestRpcBroadcast();
-    // TestTxBuilder();
-    // TestGetBlock();
+    TestRpcGetTransaction();
+    TestRpcBroadcast();
+    TestTxBuilder();
+    TestGetBlock();
     TestGetLatestBlock();
 }

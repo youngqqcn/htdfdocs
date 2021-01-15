@@ -92,6 +92,7 @@ namespace htdf
     // struct Client;
     // typedef Client;
     // using Client=httplib::Client;
+    struct CTx;
     struct CActInfo;
     struct CBroadcastRsp;
     struct CLatestBlock;
@@ -113,7 +114,7 @@ namespace htdf
         CRpc(CRpc &&) = delete;
         explicit CRpc(string strNodeHost, string chainid, int port = 1317);
         CActInfo GetAccountInfo(string strAddress);
-        string GetTransaction(string strTxHash);
+        CTx GetTransaction(string strTxHash);
         CBroadcastRsp Broadcast(string strSignedTx);
         CBlock GetBlock(uint32_t height);
         CBlock GetLatestBlock();
@@ -131,49 +132,64 @@ namespace htdf
     struct CActInfo
     {
         string address;
-        uint64_t sequence;
-        uint32_t account_number;
-        double balance;
+        uint64_t sequence = 0;
+        uint32_t account_number = 0;
+        double balance = 0;
         bool active = false;
     };
 
     struct CBroadcastRsp
     {
-        string  tx_hash;
-        // uint64_t  height;
-        string  raw_log;
+        string tx_hash;
+        string raw_log;
     };
 
-    // struct CLatestBlock
-    // {
-    //     uint32_t height;
-    //     int num_txs; // transaction count in this block
-    //     string hash;
-    // };
+    struct Amount
+    {
+        explicit Amount();
+        explicit Amount(double htdf);
+        explicit Amount(uint64_t satoshi);
+        static Amount fromStringHtdf(string htdf);
+        static Amount fromStringSatoshi(string satoshi);
+        double GetHtdf() const;
+        uint64_t GetSatoshi() const;
 
+    private:
+        double _m_amount;
+        uint64_t _m_amountSatoshi;
+    };
 
     struct CTx
     {
+        string msgType; // msg type of transaction
+        string log;     // log, if transaction failed, log is errmsg
         string hash;
         string from;
         string to;
-        double amount;
-
+        Amount amount;
         string memo;
         string data;
-        uint32_t gasWanted;
-        uint32_t gasPrice;
-        int txClassify;
-        string txTypeName;
+        uint32_t gasWanted = 0;
+        uint32_t gasPrice = 0;
+        uint32_t gasUsed = 0;
+        uint32_t height = 0;
+        string timstamp; // string format: "2021-01-14T03:25:47Z"
+
+        bool success = false;
+        string ToString() const;
+        bool empty()const {return hash.empty();}
     };
 
     struct CBlock
     {
-        uint32_t height;
-        int num_txs;
+        uint32_t height = 0;
+        int num_txs = 0;
         string hash;
-        long int blocktime;
+        // int64_t blocktime;
+        string blocktime; // UTC+0
         vector<CTx> txs;
+
+        bool empty()const {return hash.empty();};
     };
 
     class CTxBuilder
@@ -189,14 +205,13 @@ namespace htdf
             string memo = "",
             string data = "",
             uint32_t gasWanted = 30000,
-            uint32_t gasPrice = 100
-            );
+            uint32_t gasPrice = 100);
 
         string Build();
         string Sign(string privateKey);
 
     private:
-        // string 
+        // string
         string _m_unsignedTx;
         CRawTx _m_rtx;
         htdf::CBroadcastTx _m_csBTx;
@@ -214,7 +229,8 @@ namespace htdf
         uint64_t _m_amountSatoshi;
     };
 
-
-
 } // namespace htdf
+
+ostream &operator<<(ostream &os, const htdf::CTx &tx);
+
 #endif // __CPP_DEMOS_HTDF_H_
