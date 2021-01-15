@@ -26,86 +26,6 @@ using json = nlohmann::json;
 
 using namespace htdf;
 
-int htdf::CPrivateKey::sign(
-    unsigned char *pszIn,
-    unsigned int uInLen,
-    unsigned char *pszPrivKey,
-    unsigned int uPrivKeyLen,
-    unsigned char *pszOut,
-    unsigned int uOutBufLen,
-    unsigned int *puOutDataLen,
-    char *pszErrMsg)
-{
-    if (NULL == pszErrMsg)
-    {
-        return htdf::ARGS_ERROR;
-    }
-
-    if (NULL == pszIn)
-    {
-        strcpy(pszErrMsg, "pszIn is null.");
-        return htdf::ARGS_ERROR;
-    }
-
-    if (0 == uInLen)
-    {
-        strcpy(pszErrMsg, "uInLen is 0.");
-        return htdf::ARGS_ERROR;
-    }
-
-    if (NULL == pszPrivKey)
-    {
-        strcpy(pszErrMsg, "pszPrivKey is null.");
-        return htdf::ARGS_ERROR;
-    }
-
-    if (UINT_PRIV_KEY_LEN != uPrivKeyLen)
-    {
-        sprintf(pszErrMsg, "priv-key len is not %d bytes.", UINT_PRIV_KEY_LEN);
-        return htdf::ARGS_ERROR;
-    }
-
-    if (NULL == pszOut)
-    {
-        strcpy(pszErrMsg, "pszOut is null.");
-        return htdf::ARGS_ERROR;
-    }
-
-    if (uOutBufLen < UINT_SIG_RS_LEN)
-    {
-        sprintf(pszErrMsg, "uOutBufLen less than %d. Must more than %d.", UINT_SIG_RS_LEN, UINT_SIG_RS_LEN);
-        return htdf::ARGS_ERROR;
-    }
-
-    if (NULL == puOutDataLen)
-    {
-        strcpy(pszErrMsg, "puOutDataLen is null");
-        return htdf::ARGS_ERROR;
-    }
-
-    auto *ctx = GetSecp256k1Ctx();
-
-    secp256k1_ecdsa_recoverable_signature rawSig;
-    memset(&rawSig.data, 0, 65);
-    if (!secp256k1_ecdsa_sign_recoverable(ctx, &rawSig, pszIn, pszPrivKey, nullptr, nullptr))
-    {
-        strcpy(pszErrMsg, "secp256k1_ecdsa_sign_recoverable  failed.");
-        return htdf::ECCSIGN_STEP1_ERROR;
-    }
-
-    int iRecid = 0;
-    unsigned char uszSigRSData[UINT_SIG_RS_LEN] = {0};
-    memset(uszSigRSData, 0, sizeof(uszSigRSData));
-    secp256k1_ecdsa_recoverable_signature_serialize_compact(ctx, uszSigRSData, &iRecid, &rawSig);
-
-    memcpy(pszOut, uszSigRSData, UINT_SIG_RS_LEN);
-    *puOutDataLen = UINT_SIG_RS_LEN;
-
-    // no need to destroy
-    // secp256k1_context_destroy(const_cast<secp256k1_context*>(ctx));
-    return htdf::NO_ERROR;
-}
-
 
 CRawTx::CRawTx()
 {
@@ -749,6 +669,11 @@ string CTxBuilder::Build()
     {
         _m_unsignedTx = ret;
     }
+    else
+    {
+        throw runtime_error("toString error: " + ret);
+    }
+
     return ret;
 }
 
@@ -768,7 +693,7 @@ string CTxBuilder::Sign(const string& hexPrivKey)
         throw runtime_error(" private key is invalid  error");
     }
 
-    string pubKey = privKey.getPubkey().getPubKey();
+    string pubKey = privKey.getPubkey().get();
     csBTx.strPubkeyValue = EncodeBase64(pubKey);
 
     unsigned char uszShaData[CSHA256::OUTPUT_SIZE] = {0};
@@ -778,7 +703,7 @@ string CTxBuilder::Sign(const string& hexPrivKey)
     sh256.Finalize(uszShaData);
 
     std::string strSha256 = Bin2HexStr(uszShaData, sizeof(uszShaData));
-    std::string strPrivKey = privKey.getPrivkey() ;//HexToBin(privateKey);
+    std::string strPrivKey = privKey.get() ;//HexToBin(privateKey);
     unsigned char uszSigOut[64] = {0};
     memset(uszSigOut, 0, sizeof(uszSigOut));
     unsigned int uSigOutLen = 0;
@@ -792,7 +717,7 @@ string CTxBuilder::Sign(const string& hexPrivKey)
                     sizeof(uszSigOut),
                     &uSigOutLen,
                     szErrMsg);
-    if (NO_ERROR != iRet)
+    if (0 != iRet)
     {
         ret = string(szErrMsg);
         return ret;
@@ -839,12 +764,12 @@ ostream& operator << (ostream& os, const htdf::CTx &tx)
 
 
 CPublickey::CPublickey(const string& hexPubkey)
-:_m_pubkey(HexToBin(hexPubkey)),fValid(false)
+:_m_pubkey(HexToBin(hexPubkey)),_m_fValid(false)
 {
 }
 
 CPublickey::CPublickey(unsigned char* pbuf, int len)
-:_m_pubkey(string((char *)pbuf, len)),fValid(false)
+:_m_pubkey(string((char *)pbuf, len)),_m_fValid(false)
 {
 }
 
@@ -853,24 +778,10 @@ string CPublickey::hexString() const
     return Bin2HexStr((const unsigned char*)_m_pubkey.data(), _m_pubkey.size());
 }
 
-string CPublickey::getPubKey() const
+string CPublickey::get() const
 {
     return _m_pubkey;
 }
-
-// string htdf::PubkToAddress(const string &strHexPubk)
-// {
-//     CHash160 hash160;
-//     vector<unsigned char> pubk = ParseHex(strHexPubk);
-//     vector<unsigned char> out(CRIPEMD160::OUTPUT_SIZE);
-//     hash160.Write(pubk);
-//     hash160.Finalize(out);
-
-//     vector<unsigned char> conv;
-//     bech32::convertbits<8, 5, true>(conv, out);
-//     string strBech32Addr = bech32::encode(STR_HTDF, conv);
-//     return strBech32Addr;
-// }
 
 
 string CPublickey::getBech32Address() const
@@ -906,13 +817,13 @@ bool CPublickey::checkPubKey(const string& pubkey)
     return true;
 }
 
-string CPublickey::bech32AddrToHexAddr(const string& bech32Addr)
+string CPublickey::convertBech32ToHex(const string& bech32Addr)
 {
     auto ret = bech32::decode(bech32Addr);
     return HexStr( ret.second );
 }
 
-string CPublickey::hexAddrToBech32Addr(const string& hexAddr, const string& hrp)
+string CPublickey::convertHexToBech32(const string& hexAddr, const string& hrp)
 {
     string data = HexToBin(hexAddr);
     bech32::data vctData(data.begin(), data.end());
@@ -922,39 +833,39 @@ string CPublickey::hexAddrToBech32Addr(const string& hexAddr, const string& hrp)
 
 
 CPrivateKey::CPrivateKey(string hexPrivkey)
-:fValid(false)
+:_m_fValid(false)
 {
     string tmpkey = HexToBin(hexPrivkey);
     if(checkPrivkey(tmpkey))
     {
         _m_privkey = std::move(tmpkey);
-        fValid = true;
+        _m_fValid = true;
     }
 }
 
 CPrivateKey::CPrivateKey(unsigned char* pkey, int len)
-:fValid(false)
+:_m_fValid(false)
 {
     string tmpkey((const char *)pkey, len);
     // do not throw exceptions
     if(checkPrivkey(tmpkey))
     {
         _m_privkey = std::move(tmpkey);
-        fValid = true;
+        _m_fValid = true;
     }
 }
 
 
 bool CPrivateKey::isValid()const
 {
-    return fValid;
+    return _m_fValid;
 }
 
 //输入: 十六进制字符串形式的私钥
 //输出: 十六进制字符串形式的公钥
 CPublickey CPrivateKey::getPubkey()const
 {
-    if(!fValid)
+    if(!_m_fValid)
     {
         throw runtime_error("invalid private key");
     }
@@ -986,12 +897,12 @@ string CPrivateKey::hexString() const
     return Bin2HexStr((const unsigned char *)_m_privkey.data(), CPrivateKey::SIZE);
 }
 
-string CPrivateKey::getPrivkey() const
+string CPrivateKey::get() const
 {
     return _m_privkey;
 }
 
-CPrivateKey CPrivateKey::createRandomPrivKey()
+CPrivateKey CPrivateKey::newRandomPrivKey()
 {
     string privkey(32, 0);
     do
@@ -1010,4 +921,85 @@ bool CPrivateKey::checkPrivkey(const unsigned char *vch)
 bool CPrivateKey::checkPrivkey(const string& privkey)
 {
     return checkPrivkey((const unsigned char *)privkey.data());
+}
+
+
+int CPrivateKey::sign(
+    unsigned char *pszIn,
+    unsigned int uInLen,
+    unsigned char *pszPrivKey,
+    unsigned int uPrivKeyLen,
+    unsigned char *pszOut,
+    unsigned int uOutBufLen,
+    unsigned int *puOutDataLen,
+    char *pszErrMsg)
+{
+    if (NULL == pszErrMsg)
+    {
+        return 1;
+    }
+
+    if (NULL == pszIn)
+    {
+        strcpy(pszErrMsg, "pszIn is null.");
+        return 1;
+    }
+
+    if (0 == uInLen)
+    {
+        strcpy(pszErrMsg, "uInLen is 0.");
+        return 1;
+    }
+
+    if (NULL == pszPrivKey)
+    {
+        strcpy(pszErrMsg, "pszPrivKey is null.");
+        return 1;
+    }
+
+    if (UINT_PRIV_KEY_LEN != uPrivKeyLen)
+    {
+        sprintf(pszErrMsg, "priv-key len is not %d bytes.", UINT_PRIV_KEY_LEN);
+        return 1;
+    }
+
+    if (NULL == pszOut)
+    {
+        strcpy(pszErrMsg, "pszOut is null.");
+        return 1;
+    }
+
+    if (uOutBufLen < UINT_SIG_RS_LEN)
+    {
+        sprintf(pszErrMsg, "uOutBufLen less than %d. Must more than %d.", UINT_SIG_RS_LEN, UINT_SIG_RS_LEN);
+        return 1;
+    }
+
+    if (NULL == puOutDataLen)
+    {
+        strcpy(pszErrMsg, "puOutDataLen is null");
+        return 1;
+    }
+
+    auto *ctx = GetSecp256k1Ctx();
+
+    secp256k1_ecdsa_recoverable_signature rawSig;
+    memset(&rawSig.data, 0, 65);
+    if (!secp256k1_ecdsa_sign_recoverable(ctx, &rawSig, pszIn, pszPrivKey, nullptr, nullptr))
+    {
+        strcpy(pszErrMsg, "secp256k1_ecdsa_sign_recoverable  failed.");
+        return 1;
+    }
+
+    int iRecid = 0;
+    unsigned char uszSigRSData[UINT_SIG_RS_LEN] = {0};
+    memset(uszSigRSData, 0, sizeof(uszSigRSData));
+    secp256k1_ecdsa_recoverable_signature_serialize_compact(ctx, uszSigRSData, &iRecid, &rawSig);
+
+    memcpy(pszOut, uszSigRSData, UINT_SIG_RS_LEN);
+    *puOutDataLen = UINT_SIG_RS_LEN;
+
+    // no need to destroy
+    // secp256k1_context_destroy(const_cast<secp256k1_context*>(ctx));
+    return 0;
 }

@@ -222,7 +222,7 @@ void TestBuildAndSingTx()
     char szMsgBuf[1024] = {0};
     memset(szMsgBuf, 0, sizeof(szMsgBuf));
     int iRet = htdf::CPrivateKey::sign(uszShaData, sizeof(uszShaData), (unsigned char *)strPrivKey.data(), strPrivKey.size(), uszSigOut, sizeof(uszSigOut), &uSigOutLen, szMsgBuf);
-    if (htdf::NO_ERROR != iRet)
+    if (0 != iRet)
     {
         LOG_FAILED << iRet << std::endl;
         return;
@@ -269,14 +269,14 @@ void TestCpp11Random()
 
 void TestMakeNewKey()
 {
-    auto privkey = htdf::CPrivateKey::createRandomPrivKey();
+    auto privkey = htdf::CPrivateKey::newRandomPrivKey();
     if(privkey.isValid())
     {
         LOG_PASSED;
     }
     else
     {
-        LOG_FAILED << "createRandomPrivKey error" << endl;
+        LOG_FAILED << "newRandomPrivKey error" << endl;
     }
     
 }

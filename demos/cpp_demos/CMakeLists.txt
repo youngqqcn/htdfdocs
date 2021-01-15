@@ -19,8 +19,8 @@ target_link_libraries(htdf httplib libsecp256k1.a  pthread)
 add_executable(test htdf/test.cpp  )
 target_link_libraries(test htdf libsecp256k1.a )
 
-# add_executable(htdf_address_generate htdf_address_generate.cpp )
-# target_link_libraries(htdf_address_generate htdf libsecp256k1.a )
+add_executable(htdf_address_generate htdf_address_generate.cpp )
+target_link_libraries(htdf_address_generate htdf libsecp256k1.a )
 
 add_executable(htdf_transfer htdf_transfer.cpp )
 target_link_libraries(htdf_transfer htdf libsecp256k1.a )

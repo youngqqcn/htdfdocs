@@ -13,49 +13,40 @@ decriptions:  htdf
 #include <mutex>
 #include <memory>
 
-#include <secp256k1.h> // secp256k1
+#include <secp256k1.h>    // secp256k1
 #include "http/httplib.h" // for http
 #include "constant.h"
 #include "utils.h"
 
 using namespace std;
 
-namespace htdf
-{
+#define NAMESPACE_BEGIN(name) \
+    namespace name            \
+    {
+#define NAMESPACE_END }
 
 
-// void MakeNewKey(unsigned char *key32);
 
-// int PrivateKeyToCompressPubKey(const string &strPrivKey, string &strPubKey);
-
-// string PubkToAddress(const string &strPubk);
-
-enum ErrorCode
-{
-    NO_ERROR = 0,
-    ARGS_ERROR = 1001,
-    ECCSIGN_STEP1_ERROR = 1005,
-    ECCSIGN_STEP2_ERROR = 1006
-};
-
+NAMESPACE_BEGIN(htdf)
 class CPublickey
 {
 public:
     static const int SIZE = 33;
     CPublickey() = delete;
-    explicit CPublickey(const string& hexPubkey);
-    explicit CPublickey(unsigned char* pbuf, int len=CPublickey::SIZE);
+    explicit CPublickey(const string &hexPubkey);
+    explicit CPublickey(unsigned char *pbuf, int len = CPublickey::SIZE);
     string hexString() const;
-    string getPubKey() const;
+    string get() const;
     // bool verifySig(string sig);
     string getBech32Address() const;
     string getHexAddress() const;
-    static bool checkPubKey(const string& pubkey);
-    static string bech32AddrToHexAddr(const string& bech32Addr);
-    static string hexAddrToBech32Addr(const string& hexAddr, const string& hrp="htdf");
+    static bool checkPubKey(const string &pubkey);
+    static string convertBech32ToHex(const string &bech32Addr);
+    static string convertHexToBech32(const string &hexAddr, const string &hrp = "htdf");
+
 private:
     string _m_pubkey;
-    bool fValid;
+    bool _m_fValid;
 };
 
 class CPrivateKey
@@ -65,13 +56,13 @@ public:
 
     CPrivateKey() = delete;
     explicit CPrivateKey(string hexPrivkey);
-    explicit CPrivateKey(unsigned char* pbuf, int len=CPrivateKey::SIZE);
+    explicit CPrivateKey(unsigned char *pbuf, int len = CPrivateKey::SIZE);
 
     CPublickey getPubkey() const;
     string hexString() const;
-    string getPrivkey() const;
+    string get() const;
 
-    static CPrivateKey createRandomPrivKey();
+    static CPrivateKey newRandomPrivKey();
 
     static int sign(
         unsigned char *pszIn,
@@ -84,15 +75,14 @@ public:
         char *pszErrMsg);
 
     static bool checkPrivkey(const unsigned char *vch);
-    static bool checkPrivkey(const string& privkey);
+    static bool checkPrivkey(const string &privkey);
 
-    bool isValid()const;
+    bool isValid() const;
 
 private:
     string _m_privkey;
-    bool   fValid;
+    bool _m_fValid;
 };
-
 
 struct CRawTx
 {
@@ -133,9 +123,6 @@ struct CBroadcastTx
     bool toHexStr(string &strOut);
 };
 
-// struct Client;
-// typedef Client;
-// using Client=httplib::Client;
 struct CTx;
 struct CActInfo;
 struct CBroadcastRsp;
@@ -221,7 +208,7 @@ struct CTx
 
     bool success = false;
     string ToString() const;
-    bool empty()const {return hash.empty();}
+    bool empty() const { return hash.empty(); }
 };
 
 struct CBlock
@@ -233,7 +220,7 @@ struct CBlock
     string blocktime; // UTC+0
     vector<CTx> txs;
 
-    bool empty()const {return hash.empty();};
+    bool empty() const { return hash.empty(); };
 };
 
 class CTxBuilder
@@ -252,7 +239,7 @@ public:
         uint32_t gasPrice = 100);
 
     string Build();
-    string Sign(const string& privateKey);
+    string Sign(const string &privateKey);
 
 private:
     // string
@@ -273,7 +260,8 @@ private:
     uint64_t _m_amountSatoshi;
 };
 
-} // namespace htdf
+NAMESPACE_END // htdf
+
 
 ostream &operator<<(ostream &os, const htdf::CTx &tx);
 
