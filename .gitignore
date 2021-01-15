@@ -2,7 +2,7 @@ mainnet/config/config.tar.gz
 demos/golang_demos/keystore_convert.tar.gz
 demos/nodejs_demos/node_modules
 demos/golang_demos/keystore_convert
-.vscode
+./.vscode
 demos/java_demos/target
 demos/java_demos/.classpath
 demos/java_demos/.project

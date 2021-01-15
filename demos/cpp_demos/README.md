@@ -2,7 +2,7 @@
 
 - cmake : `sudo apt install cmake`
 
-### dependecy
+### dependencies
 
 - secp256k1 : https://github.com/bitcoin-core/secp256k1
 
@@ -26,6 +26,15 @@ cd cpp_demos
 mkdir build && cd build
 cmake ../
 make
+
+# run all unit test cases
 ./test
+
+# htdf address demo
+./htdf_address_generate
+
+# htdf normal transaction demo
+./htdf_transfer
+
 ```
 
