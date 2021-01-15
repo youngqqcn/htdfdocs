@@ -23,8 +23,8 @@ from func_timeout import func_set_timeout
 g_chainid = 'testchain'
 g_fromaddr = 'htdf1xwpsq6yqx0zy6grygy7s395e2646wggufqndml'
 g_privkey = '279bdcd8dccec91f9e079894da33d6888c0f9ef466c0b200921a1bf1ea7d86e8'
-# g_node_ip_port = 'htdf2020-test01.orientwalt.cn:1317'
-g_node_ip_port = '192.168.0.171:1317'
+g_node_ip_port = 'htdf2020-test01.orientwalt.cn:1317'
+# g_node_ip_port = '192.168.0.171:1317'
 g_gaslimit = 30000
 g_gasprice = 100
 

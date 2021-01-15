@@ -18,16 +18,13 @@ decriptions:  htdf
 #include "constant.h"
 #include "utils.h"
 
+
+
+
+namespace htdf 
+{
 using namespace std;
 
-#define NAMESPACE_BEGIN(name) \
-    namespace name            \
-    {
-#define NAMESPACE_END }
-
-
-
-NAMESPACE_BEGIN(htdf)
 class CPublickey
 {
 public:
@@ -260,7 +257,7 @@ private:
     uint64_t _m_amountSatoshi;
 };
 
-NAMESPACE_END // htdf
+} // htdf
 
 
 ostream &operator<<(ostream &os, const htdf::CTx &tx);

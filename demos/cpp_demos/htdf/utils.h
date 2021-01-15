@@ -19,6 +19,9 @@
 
 using namespace std;
 
+namespace htdf
+{
+
 inline secp256k1_context const *GetSecp256k1Ctx()
 {
     static std::unique_ptr<secp256k1_context, decltype(&secp256k1_context_destroy)> s_ctx{
@@ -166,5 +169,8 @@ inline std::string RemoveSpace(const std::string &str, const std::string &patter
     }
     return ret;
 }
+
+
+}// htdf
 
 #endif // __CPP_DEMOS_UTILS_H__

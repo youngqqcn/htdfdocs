@@ -861,8 +861,6 @@ bool CPrivateKey::isValid()const
     return _m_fValid;
 }
 
-//输入: 十六进制字符串形式的私钥
-//输出: 十六进制字符串形式的公钥
 CPublickey CPrivateKey::getPubkey()const
 {
     if(!_m_fValid)

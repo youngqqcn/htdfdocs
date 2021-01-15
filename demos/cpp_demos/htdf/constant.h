@@ -1,6 +1,9 @@
 #ifndef __CPP_DEMOS_CONSTANT_H__
 #define __CPP_DEMOS_CONSTANT_H__
 
+namespace htdf 
+{
+
 #define UINT_MAX_FEE_AMOUNT (2000000000)
 #define UINT_MIN_FEE_AMOUNT (10)
 #define UINT_MAX_GAS_AMOUNT (200000000)
@@ -21,5 +24,7 @@
 #define STR_BROADCAST_MSG_TYPE "htdfservice/send"
 #define STR_BROADCAST_MSG_TYPE_HET "hetservice/send"
 #define STR_BROADCAST_PUB_KEY_TYPE "tendermint/PubKeySecp256k1"
+
+}// htdf
 
 #endif //__CPP_DEMOS_CONSTANT_H__

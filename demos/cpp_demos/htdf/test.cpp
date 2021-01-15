@@ -37,7 +37,7 @@ void TestBitcoinSHA256()
 
     sha256.Write((const unsigned char *)strTest.data(), strTest.size())
         .Finalize((unsigned char *)strHash.data());
-    string strHexHash = Bin2HexStr((const unsigned char *)strHash.data(), strHash.size());
+    string strHexHash = htdf::Bin2HexStr((const unsigned char *)strHash.data(), strHash.size());
 
     if (strHexHash == strExpectedHash)
     {
@@ -58,7 +58,7 @@ void TestBitcoinRipemd160()
     strHash.resize(CRIPEMD160::OUTPUT_SIZE);
     ripemd160.Write((const unsigned char *)strTest.data(), strTest.size())
         .Finalize((unsigned char *)strHash.data());
-    string strHexHash = Bin2HexStr((const unsigned char *)strHash.data(), strHash.size());
+    string strHexHash = htdf::Bin2HexStr((const unsigned char *)strHash.data(), strHash.size());
     string strExpectedHash = "9c1185a5c5e9fc54612808977ee8f548b2258d31";
 
     if (strHexHash == strExpectedHash)
@@ -202,7 +202,7 @@ void TestBuildAndSingTx()
     sh256.Write((unsigned char *)strOut.data(), strOut.size());
     sh256.Finalize(uszShaData);
 
-    std::string strSha256 = Bin2HexStr(uszShaData, sizeof(uszShaData));
+    std::string strSha256 = htdf::Bin2HexStr(uszShaData, sizeof(uszShaData));
     // std::cout << "sha256 output: " << std::endl
     //           << strSha256 << std::endl
     //           << std::endl
@@ -215,7 +215,7 @@ void TestBuildAndSingTx()
         return;
     }
 
-    std::string strPrivKey = HexToBin(std::string("485de9a2ee4ed834272389617da915da9176bd5281ec5d261256e15be0c375f2"));
+    std::string strPrivKey = htdf::HexToBin(std::string("485de9a2ee4ed834272389617da915da9176bd5281ec5d261256e15be0c375f2"));
     unsigned char uszSigOut[64] = {0};
     memset(uszSigOut, 0, sizeof(uszSigOut));
     unsigned int uSigOutLen = 0;
@@ -227,7 +227,7 @@ void TestBuildAndSingTx()
         LOG_FAILED << iRet << std::endl;
         return;
     }
-    std::string strTmpSig = Bin2HexStr(uszSigOut, uSigOutLen);
+    std::string strTmpSig = htdf::Bin2HexStr(uszSigOut, uSigOutLen);
 
     string strExpectedSig = "9f670ff17ef97d3d9dbf35b7bbbcd9b6c21a475c134eb4f8ae2abb10ddcb60a606b19edcd59ca8f388730c450b9fc88d57b2a0566bc71630cca3093b4aff3bb3";
     if (strTmpSig == strExpectedSig)
@@ -261,8 +261,8 @@ void TestCpp11Random()
 {
     // random
     unsigned char entroy32[32];
-    GetRandom32Bytes(entroy32);
-    string strRand = Bin2HexStr(entroy32, sizeof(entroy32));
+    htdf::GetRandom32Bytes(entroy32);
+    string strRand = htdf::Bin2HexStr(entroy32, sizeof(entroy32));
     // cout << "rand = " << strRand << endl;
     LOG_PASSED;
 }
@@ -302,7 +302,7 @@ void TestPubkToAddress()
 void TestHex2Bin()
 {
     string hex = "02a5314d3192bbe6dd9dd86465ea1e623cb4af01be99616e5c4838be69aeab8b54";
-    string bin = HexToBin(hex);
+    string bin = htdf::HexToBin(hex);
     unsigned char szExpected[] = {
         2, 165, 49, 77, 49, 146, 187, 230, 221, 157, 216, 100,
         101, 234, 30, 98, 60, 180, 175, 1,
