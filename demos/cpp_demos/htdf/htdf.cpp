@@ -871,7 +871,7 @@ string CTx::ToString() const
         "hash:%s\n"
         "from:%s\n"
         "to:%s\n"
-        "amount:%s htdf\n"
+        "amount:%.8f htdf\n"
         "memo:%s\n"
         "data:%s\n"
         "gasWanted:%u\n"
