@@ -1,9 +1,14 @@
-#include <iostream>
-using namespace std;
+/*
+author: yqq 
+date: 2021-01-15 
+descriptions: htdf normal transaction demo written in cpp
+*/
 
-#include "htdf/htdf.h"
+#include <iostream>
 #include <thread>
 #include <chrono>
+#include "htdf/htdf.h"
+using namespace std;
 
 void TransferDemo()
 {

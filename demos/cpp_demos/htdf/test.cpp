@@ -221,7 +221,7 @@ void TestBuildAndSingTx()
     unsigned int uSigOutLen = 0;
     char szMsgBuf[1024] = {0};
     memset(szMsgBuf, 0, sizeof(szMsgBuf));
-    int iRet = htdf::sign(uszShaData, sizeof(uszShaData), (unsigned char *)strPrivKey.data(), strPrivKey.size(), uszSigOut, sizeof(uszSigOut), &uSigOutLen, szMsgBuf);
+    int iRet = htdf::CPrivateKey::sign(uszShaData, sizeof(uszShaData), (unsigned char *)strPrivKey.data(), strPrivKey.size(), uszSigOut, sizeof(uszSigOut), &uSigOutLen, szMsgBuf);
     if (htdf::NO_ERROR != iRet)
     {
         LOG_FAILED << iRet << std::endl;
@@ -245,7 +245,9 @@ void TestPrivKeyToPubKeyCompress()
     string strPrivKey = "f4c3b67fb023405e615994f12bcfad63255d90b47c179d7bb00f612000dd5a2b";
     string strPubKey;
     string strRightPubKey = "02af7557b38a3f2313e49ca2109859736786832052bc8bca2cf5ae81d3f5e21e83";
-    if (0 == htdf::PrivateKeyToCompressPubKey(strPrivKey, strPubKey))
+
+    htdf::CPrivateKey privkey(strPrivKey);
+    if(strRightPubKey == privkey.getPubkey().hexString() )
     {
         LOG_PASSED;
     }
@@ -267,20 +269,26 @@ void TestCpp11Random()
 
 void TestMakeNewKey()
 {
-    unsigned char key[32];
-    htdf::MakeNewKey(key);
-    string strRand = Bin2HexStr(key, sizeof(key));
-    // cout << "rand = " << strRand << endl;
-    LOG_PASSED;
+    auto privkey = htdf::CPrivateKey::createRandomPrivKey();
+    if(privkey.isValid())
+    {
+        LOG_PASSED;
+    }
+    else
+    {
+        LOG_FAILED << "createRandomPrivKey error" << endl;
+    }
+    
 }
 
 void TestPubkToAddress()
 {
     // private key: 5c9afe978e62a4f9911d0d8314f401c679f6abd2392f16e31256d62604975e15
     string strPubk = "02a5314d3192bbe6dd9dd86465ea1e623cb4af01be99616e5c4838be69aeab8b54";
-    string strAddr = htdf::PubkToAddress(strPubk);
-    string strAddress = "htdf106pthht5503w3u96se9utzxl0aq302ya32m6ky";
 
+    htdf::CPublickey pubKey(strPubk);
+    string strAddr = pubKey.getBech32Address();
+    string strAddress = "htdf106pthht5503w3u96se9utzxl0aq302ya32m6ky";
     if (strAddr == strAddress)
     {
         LOG_PASSED;
@@ -466,20 +474,20 @@ void TestGetLatestBlock()
 
 int main(int argc, char const *argv[])
 {
-    // TestBuildAndSingTx();
-    // TestHtdfRawTx();
-    // TestBroadcastTx();
-    // TestPrivKeyToPubKeyCompress();
-    // TestCpp11Random();
-    // TestMakeNewKey();
-    // TestPubkToAddress();
-    // TestBitcoinSHA256();
-    // TestBitcoinRipemd160();
-    // TestBech32();
-    // TestHex2Bin();
-    // TestBitcoinHex2Bin();
-    // TestBitcoinBase64();
-    // TestRpcGetAccountInfo();
+    TestBuildAndSingTx();
+    TestHtdfRawTx();
+    TestBroadcastTx();
+    TestPrivKeyToPubKeyCompress();
+    TestCpp11Random();
+    TestMakeNewKey();
+    TestPubkToAddress();
+    TestBitcoinSHA256();
+    TestBitcoinRipemd160();
+    TestBech32();
+    TestHex2Bin();
+    TestBitcoinHex2Bin();
+    TestBitcoinBase64();
+    TestRpcGetAccountInfo();
     TestRpcGetTransaction();
     TestRpcBroadcast();
     TestTxBuilder();

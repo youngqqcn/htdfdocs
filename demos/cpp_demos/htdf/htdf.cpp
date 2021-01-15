@@ -1,8 +1,6 @@
-﻿/************************************************************************
-author: yqq
-date: 2019-05-08  14:25
-descriptions: htdf transaction signature 
-************************************************************************/
+﻿// author: yqq
+// date: 2021-01-15
+// descriptions: htdf transaction signature 
 
 #include <map>
 #include <exception>
@@ -28,7 +26,7 @@ using json = nlohmann::json;
 
 using namespace htdf;
 
-int htdf::sign(
+int htdf::CPrivateKey::sign(
     unsigned char *pszIn,
     unsigned int uInLen,
     unsigned char *pszPrivKey,
@@ -108,34 +106,6 @@ int htdf::sign(
     return htdf::NO_ERROR;
 }
 
-//输入: 十六进制字符串形式的私钥
-//输出: 十六进制字符串形式的公钥
-int htdf::PrivateKeyToCompressPubKey(const string &strPrivKey, string &strPubKey)
-{
-    const int PUBK_SIZE = 33;
-    string privKey = HexToBin(strPrivKey);
-    secp256k1_pubkey pubkey;
-    memset(pubkey.data, 0, sizeof(pubkey.data));
-
-    auto *ctx = GetSecp256k1Ctx();
-
-    if (!secp256k1_ec_pubkey_create(ctx, &pubkey, (unsigned char *)privKey.data()))
-    {
-        return 1;
-    }
-
-    unsigned char output[128] = {0};
-    memset(output, 0, sizeof(output));
-    size_t outputlen = 33;
-    secp256k1_ec_pubkey_serialize(ctx, output, &outputlen, &pubkey, SECP256K1_EC_COMPRESSED);
-    if (33 != outputlen)
-    {
-        return 1;
-    }
-
-    strPubKey = Bin2HexStr(output, outputlen);
-    return 0;
-}
 
 CRawTx::CRawTx()
 {
@@ -449,8 +419,7 @@ bool CBroadcastTx::checkParams(string &strErrMsg)
 
     if (strPubkeyValue.empty())
     {
-
-        strErrMsg = tfm::format("invalid `pub_key value` is empty, must be base64(pubkey).", strPubKeyType, STR_BROADCAST_PUB_KEY_TYPE);
+        strErrMsg = tfm::format("invalid `pub_key value`: is empty, must be base64(pubkey).");
         return false;
     }
 
@@ -547,33 +516,6 @@ uint64_t Amount::GetSatoshi() const
     return _m_amountSatoshi;
 }
 
-bool Check(const unsigned char *vch)
-{
-    auto *ctx = GetSecp256k1Ctx();
-    return secp256k1_ec_seckey_verify(ctx, vch);
-}
-
-void htdf::MakeNewKey(unsigned char *key32)
-{
-    do
-    {
-        GetRandom32Bytes(key32);
-    } while (!Check(key32));
-}
-
-string htdf::PubkToAddress(const string &strHexPubk)
-{
-    CHash160 hash160;
-    vector<unsigned char> pubk = ParseHex(strHexPubk);
-    vector<unsigned char> out(CRIPEMD160::OUTPUT_SIZE);
-    hash160.Write(pubk);
-    hash160.Finalize(out);
-
-    vector<unsigned char> conv;
-    bech32::convertbits<8, 5, true>(conv, out);
-    string strBech32Addr = bech32::encode(STR_HTDF, conv);
-    return strBech32Addr;
-}
 
 CRpc::CRpc(string strNodeHost, string chainid, int port)
     : _m_pHttp(new httplib::Client(strNodeHost, port)),
@@ -617,13 +559,12 @@ CActInfo CRpc::GetAccountInfo(string strAddress)
     CActInfo act;
     string url = GetURL(ACCOUNT_INFO, strAddress);
     auto res = _m_pHttp->Get(url.c_str());
-
-    cout << res->body << endl;
+    // cout << res->body << endl;
 
     if (200 != res->status)
     {
         cerr << "error" << res->status << endl;
-        return act;
+        throw runtime_error("get account" + strAddress + " failed ");
     }
 
     auto jrsp = json::parse(res->body);
@@ -644,7 +585,7 @@ CTx CRpc::GetTransaction(string strTxHash)
     if (200 != res->status)
     {
         cerr << "error" << res->status << endl;
-        return tx;
+        throw runtime_error("get tx " + strTxHash + " failed ");
     }
 
     auto jrsp = json::parse(res->body);
@@ -690,7 +631,7 @@ CBroadcastRsp CRpc::Broadcast(string strSignedTx)
     if (200 != res->status)
     {
         cerr << "error" << res->status << endl;
-        return ret;
+        throw runtime_error( "reponse body: " + res->body);
     }
 
     auto jrsp = json::parse(res->body);
@@ -712,7 +653,7 @@ CBlock CRpc::GetBlock(uint32_t height)
     if (200 != res->status)
     {
         cerr << "error" << res->status << endl;
-        return block;
+        throw runtime_error( "get block " + ToString(height) + " failed");
     }
 
     auto jrsp = json::parse(res->body);
@@ -758,8 +699,7 @@ CBlock CRpc::GetLatestBlock()
     auto res = _m_pHttp->Get(url.c_str());
     if (200 != res->status)
     {
-        cerr << "error" << res->status << endl;
-        return block;
+        throw runtime_error("get latest block failed");
     }
 
     auto jrsp = json::parse(res->body);
@@ -812,7 +752,7 @@ string CTxBuilder::Build()
     return ret;
 }
 
-string CTxBuilder::Sign(string privateKey)
+string CTxBuilder::Sign(const string& hexPrivKey)
 {
     string ret;
 
@@ -822,15 +762,14 @@ string CTxBuilder::Sign(string privateKey)
     csBTx.strMsgType = STR_BROADCAST_MSG_TYPE;
     csBTx.strPubKeyType = STR_BROADCAST_PUB_KEY_TYPE;
 
-    string pubKey;
-    int iret = PrivateKeyToCompressPubKey(privateKey, pubKey);
-    if (0 != iret)
+    htdf::CPrivateKey privKey(hexPrivKey);
+    if (!privKey.isValid())
     {
-        ret = "PrivateKeyToCompressPubKey error";
-        return ret;
+        throw runtime_error(" private key is invalid  error");
     }
 
-    csBTx.strPubkeyValue = EncodeBase64(HexToBin(pubKey));
+    string pubKey = privKey.getPubkey().getPubKey();
+    csBTx.strPubkeyValue = EncodeBase64(pubKey);
 
     unsigned char uszShaData[CSHA256::OUTPUT_SIZE] = {0};
     memset(uszShaData, 0, sizeof(uszShaData));
@@ -839,14 +778,14 @@ string CTxBuilder::Sign(string privateKey)
     sh256.Finalize(uszShaData);
 
     std::string strSha256 = Bin2HexStr(uszShaData, sizeof(uszShaData));
-    std::string strPrivKey = HexToBin(privateKey);
+    std::string strPrivKey = privKey.getPrivkey() ;//HexToBin(privateKey);
     unsigned char uszSigOut[64] = {0};
     memset(uszSigOut, 0, sizeof(uszSigOut));
     unsigned int uSigOutLen = 0;
     char szErrMsg[256] = {0};
     memset(szErrMsg, 0, sizeof(szErrMsg));
 
-    int iRet = sign(uszShaData, sizeof(uszShaData),
+    int iRet = CPrivateKey::sign(uszShaData, sizeof(uszShaData),
                     (unsigned char *)strPrivKey.data(),
                     strPrivKey.size(),
                     uszSigOut,
@@ -895,4 +834,180 @@ ostream& operator << (ostream& os, const htdf::CTx &tx)
     os << tx.ToString();
     os << "===============" << endl;
     return os;
+}
+
+
+
+CPublickey::CPublickey(const string& hexPubkey)
+:_m_pubkey(HexToBin(hexPubkey)),fValid(false)
+{
+}
+
+CPublickey::CPublickey(unsigned char* pbuf, int len)
+:_m_pubkey(string((char *)pbuf, len)),fValid(false)
+{
+}
+
+string CPublickey::hexString() const
+{
+    return Bin2HexStr((const unsigned char*)_m_pubkey.data(), _m_pubkey.size());
+}
+
+string CPublickey::getPubKey() const
+{
+    return _m_pubkey;
+}
+
+// string htdf::PubkToAddress(const string &strHexPubk)
+// {
+//     CHash160 hash160;
+//     vector<unsigned char> pubk = ParseHex(strHexPubk);
+//     vector<unsigned char> out(CRIPEMD160::OUTPUT_SIZE);
+//     hash160.Write(pubk);
+//     hash160.Finalize(out);
+
+//     vector<unsigned char> conv;
+//     bech32::convertbits<8, 5, true>(conv, out);
+//     string strBech32Addr = bech32::encode(STR_HTDF, conv);
+//     return strBech32Addr;
+// }
+
+
+string CPublickey::getBech32Address() const
+{
+    CHash160 hash160;
+    vector<unsigned char> pubk(_m_pubkey.begin(), _m_pubkey.end());
+    vector<unsigned char> out(CRIPEMD160::OUTPUT_SIZE);
+    hash160.Write(pubk);
+    hash160.Finalize(out);
+
+    vector<unsigned char> conv;
+    bech32::convertbits<8, 5, true>(conv, out);
+    string strBech32Addr = bech32::encode(STR_HTDF, conv);
+    return strBech32Addr;
+}
+
+string CPublickey::getHexAddress() const
+{
+    CHash160 hash160;
+    vector<unsigned char> pubk(_m_pubkey.begin(), _m_pubkey.end());
+    vector<unsigned char> out(CRIPEMD160::OUTPUT_SIZE);
+    hash160.Write(pubk);
+    hash160.Finalize(out);
+
+    vector<unsigned char> conv;
+    bech32::convertbits<8, 5, true>(conv, out);
+    return HexStr(conv);
+}
+
+bool CPublickey::checkPubKey(const string& pubkey)
+{
+    // TODO:
+    return true;
+}
+
+string CPublickey::bech32AddrToHexAddr(const string& bech32Addr)
+{
+    auto ret = bech32::decode(bech32Addr);
+    return HexStr( ret.second );
+}
+
+string CPublickey::hexAddrToBech32Addr(const string& hexAddr, const string& hrp)
+{
+    string data = HexToBin(hexAddr);
+    bech32::data vctData(data.begin(), data.end());
+    string strBech32Addr = bech32::encode(hrp, vctData);
+    return strBech32Addr;
+}
+
+
+CPrivateKey::CPrivateKey(string hexPrivkey)
+:fValid(false)
+{
+    string tmpkey = HexToBin(hexPrivkey);
+    if(checkPrivkey(tmpkey))
+    {
+        _m_privkey = std::move(tmpkey);
+        fValid = true;
+    }
+}
+
+CPrivateKey::CPrivateKey(unsigned char* pkey, int len)
+:fValid(false)
+{
+    string tmpkey((const char *)pkey, len);
+    // do not throw exceptions
+    if(checkPrivkey(tmpkey))
+    {
+        _m_privkey = std::move(tmpkey);
+        fValid = true;
+    }
+}
+
+
+bool CPrivateKey::isValid()const
+{
+    return fValid;
+}
+
+//输入: 十六进制字符串形式的私钥
+//输出: 十六进制字符串形式的公钥
+CPublickey CPrivateKey::getPubkey()const
+{
+    if(!fValid)
+    {
+        throw runtime_error("invalid private key");
+    }
+
+    secp256k1_pubkey pubkey;
+    memset(pubkey.data, 0, sizeof(pubkey.data));
+
+    auto *ctx = GetSecp256k1Ctx();
+
+    if (!secp256k1_ec_pubkey_create(ctx, &pubkey, (unsigned char *)_m_privkey.data()))
+    {
+        throw runtime_error("secp256k1_ec_pubkey_create error");
+    }
+
+    unsigned char output[CPublickey::SIZE * 2] = {0};
+    memset(output, 0, sizeof(output));
+    size_t outputlen = CPublickey::SIZE;
+    secp256k1_ec_pubkey_serialize(ctx, output, &outputlen, &pubkey, SECP256K1_EC_COMPRESSED);
+    if (CPublickey::SIZE != outputlen)
+    {
+        throw runtime_error("secp256k1_ec_pubkey_serialize  error");
+    }
+    return std::move(CPublickey(output, outputlen));
+}
+
+
+string CPrivateKey::hexString() const
+{
+    return Bin2HexStr((const unsigned char *)_m_privkey.data(), CPrivateKey::SIZE);
+}
+
+string CPrivateKey::getPrivkey() const
+{
+    return _m_privkey;
+}
+
+CPrivateKey CPrivateKey::createRandomPrivKey()
+{
+    string privkey(32, 0);
+    do
+    {
+        GetRandom32Bytes((unsigned char*)privkey.data());
+    } while (!checkPrivkey(privkey));
+    return std::move(CPrivateKey(privkey));
+}
+
+bool CPrivateKey::checkPrivkey(const unsigned char *vch)
+{
+    auto *ctx = GetSecp256k1Ctx();
+    return secp256k1_ec_seckey_verify(ctx, vch);
+}
+
+bool CPrivateKey::checkPrivkey(const string& privkey)
+{
+    return checkPrivkey((const unsigned char *)privkey.data());
 }
