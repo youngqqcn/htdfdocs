@@ -7,3 +7,7 @@ demos/java_demos/target
 demos/java_demos/.classpath
 demos/java_demos/.project
 demos/java_demos/.settings
+
+demos/python_demos/.idea
+demos/python_demos/.vscode
+demos/python_demos/tools

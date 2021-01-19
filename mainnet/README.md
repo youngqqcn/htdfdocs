@@ -14,6 +14,7 @@
 |CPU|4核|2核|
 |内存|8G|4G|
 |磁盘|60G(可扩展)|60G(可扩展)|
+|带宽|2~4M| 1M |
 
 
 ## 获取最新应用和配置
@@ -102,10 +103,4 @@ $curl http://localhost:1317/blocks/latest
 
 
 ```
-
-
-## RPC接口文档
-
-https://gitee.com/orientwalt/docs/doc/api.md
-
 
