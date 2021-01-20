@@ -7,6 +7,7 @@
 目录
 - [术语定义](#术语定义)
 - [Bech32地址和HEX-20地址的转换](#Bech32地址和HEX-20地址的转换)
+- [常用的HRC20函数签名对照表](#常用的HRC20函数签名对照表)
 - [HRC20常用操作](#HRC20常用操作)
   - [查询地址余额(balanceOf)](#查询地址余额balanceOf)
   - [查询智能合约名称(name)](#查询智能合约名称name)
@@ -88,7 +89,9 @@ hex20ContractAddr=f03a3e05372a3397918475cc92284c895325ac7d
 ```
 
 
-# 常用的HRC20函数签名表)
+# 常用的HRC20函数签名对照表
+
+以下函数签名对于符合ERC20标准(HRC20)的智能合约是固定不变的,可直接使用
 
 |函数签名|对应函数 | 说明|
 |-------|--------|---------|
@@ -107,7 +110,7 @@ hex20ContractAddr=f03a3e05372a3397918475cc92284c895325ac7d
 
 ## 查询地址余额balanceOf
 
-如上[常用的HRC20函数签名表](#常用的HRC20函数签名表), 使用`balanceOf`函数, 函数签名为:`70a08231`
+如上[常用的HRC20函数签名对照表](#常用的HRC20函数签名对照表), 使用`balanceOf`函数, 函数签名为:`70a08231`
 
 #### RPC接口
 http://htdf2020-test01.orientwalt.cn:1317/hs/contract/[Bech32合约地址]/70a08231+[前补零HEX-20地址]
@@ -135,7 +138,7 @@ $python -c "print int('${balanceOfHex}', 16)"  ###（10进制）
 ## 查询智能合约名称name
 
 
-如上[常用的HRC20函数签名表](#常用的HRC20函数签名表),, 使用`name`函数, 函数签名为:`06fdde03`
+如上[常用的HRC20函数签名对照表](#常用的HRC20函数签名对照表),, 使用`name`函数, 函数签名为:`06fdde03`
 
 #### RPC接口
 http://htdf2020-test01.orientwalt.cn:1317/hs/contract/[Bech32合约地址]/06fdde03
@@ -160,7 +163,7 @@ $python -c "print bytearray.fromhex('$name')"
 ## 查询代币总发行量totalSupply
 
 
-如上[常用的HRC20函数签名表](#常用的HRC20函数签名表),, 使用`totalSupply`函数, 函数签名为:`18160ddd`
+如上[常用的HRC20函数签名对照表](#常用的HRC20函数签名对照表),, 使用`totalSupply`函数, 函数签名为:`18160ddd`
 
 #### RPC接口
 http://htdf2020-test01.orientwalt.cn:1317/hs/contract/[Bech32合约地址]/18160ddd
@@ -185,7 +188,7 @@ $python -c "print bytearray.fromhex('$name')"
 
 ## 查询代币简称symbol
 
-如上[常用的HRC20函数签名表](#常用的HRC20函数签名表),, 使用`symbol`函数, 函数签名为:`95d89b41`
+如上[常用的HRC20函数签名对照表](#常用的HRC20函数签名对照表),, 使用`symbol`函数, 函数签名为:`95d89b41`
 
 #### RPC接口
 http://htdf2020-test01.orientwalt.cn:1317/hs/contract/[Bech32合约地址]/95d89b41
@@ -209,7 +212,7 @@ $python -c "print bytearray.fromhex('$symbol')"
 
 ## 查代币精度decimals
 
-如上[常用的HRC20函数签名表](#常用的HRC20函数签名表),, 使用`decimals`函数, 函数签名为:`313ce567`
+如上[常用的HRC20函数签名对照表](#常用的HRC20函数签名对照表),, 使用`decimals`函数, 函数签名为:`313ce567`
 
 
 #### RPC 接口
@@ -311,7 +314,7 @@ python -c "print int('$decimals',16)"
 htdf1rcl9x2akjuy3tyqyxwk7sataldzmxy6jm06hq4
 ```
 
-1.如上[常用的HRC20函数签名表](#常用的HRC20函数签名表), 转账使用`transfer`函数, 其签名为:
+1.如上[常用的HRC20函数签名对照表](#常用的HRC20函数签名对照表), 转账使用`transfer`函数, 其签名为:
 
 ```
 a9059cbb
