@@ -7,13 +7,13 @@
 目录
 - [术语定义](#术语定义)
 - [Bech32地址和HEX-20地址的转换](#Bech32地址和HEX-20地址的转换)
-- [HRC-20常用操作](#HRC-20常用操作)
-  - [查询地址余额(balanceOf)](#查询地址余额(balanceOf))
-  - [查询智能合约名称(name)](#查询智能合约名称(name))
-  - [查询代币总发行量(totalSupply)](#查询代币总发行量(totalSupply))
-  - [查询代币简称(symbol)](#查询代币简称(symbol))
-  - [查代币精度(decimals)](#查代币精度(decimals))
-- [例子:真实HRC20转账](#案例:HRC20转账)
+- [HRC20常用操作](#HRC20常用操作)
+  - [查询地址余额(balanceOf)](#查询地址余额balanceOf)
+  - [查询智能合约名称(name)](#查询智能合约名称name)
+  - [查询代币总发行量(totalSupply)](#查询代币总发行量totalSupply)
+  - [查询代币简称(symbol)](#查询代币简称symbol)
+  - [查代币精度(decimals)](#查代币精度decimals)
+- [例子:HRC20转账](#案例HRC20转账)
 
 
 
@@ -101,11 +101,11 @@ hex20ContractAddr=f03a3e05372a3397918475cc92284c895325ac7d
 
 
 
-# HRC-20免费查询接口
+# HRC20免费查询接口
 
 
 
-## 查询地址余额(balanceOf)
+## 查询地址余额balanceOf
 
 如上[常用的HRC20函数签名表](#常用的HRC20函数签名表), 使用`balanceOf`函数, 函数签名为:`70a08231`
 
@@ -132,7 +132,7 @@ $python -c "print int('${balanceOfHex}', 16)"  ###（10进制）
 
 ```
 
-## 查询智能合约名称(name)
+## 查询智能合约名称name
 
 
 如上[常用的HRC20函数签名表](#常用的HRC20函数签名表),, 使用`name`函数, 函数签名为:`06fdde03`
@@ -157,7 +157,7 @@ $python -c "print bytearray.fromhex('$name')"
 ```
 
 
-## 查询代币总发行量(totalSupply)
+## 查询代币总发行量totalSupply
 
 
 如上[常用的HRC20函数签名表](#常用的HRC20函数签名表),, 使用`totalSupply`函数, 函数签名为:`18160ddd`
@@ -183,7 +183,7 @@ $python -c "print bytearray.fromhex('$name')"
 
 
 
-## 查询代币简称(symbol)
+## 查询代币简称symbol
 
 如上[常用的HRC20函数签名表](#常用的HRC20函数签名表),, 使用`symbol`函数, 函数签名为:`95d89b41`
 
@@ -207,7 +207,7 @@ $symbol=`hscli query contract htdf1nkkc48lfchy92ahg50akj2384v4yfqpm4hsq6y 95d89b
 $python -c "print bytearray.fromhex('$symbol')"
 ```
 
-## 查代币精度(decimals)
+## 查代币精度decimals
 
 如上[常用的HRC20函数签名表](#常用的HRC20函数签名表),, 使用`decimals`函数, 函数签名为:`313ce567`
 
@@ -230,7 +230,7 @@ python -c "print int('$decimals',16)"
 
 
 
-# 案例:HRC20转账
+# 案例HRC20转账
 
 > 提示: 如果你熟悉Python, 可以使用htdfsdk轻松对接HRC20
 >
