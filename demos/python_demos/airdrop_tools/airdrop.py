@@ -5,17 +5,11 @@
 
 import json
 import time
+import random
 from pprint import pprint
-
-import requests
-from eth_typing import URI
 from htdfsdk import to_checksum_address, remove_0x_prefix
-
 from htdfsdk import Address, HtdfRPC, HtdfPrivateKey, HtdfTxBuilder, htdf_to_satoshi
 from htdfsdk import HtdfContract
-from htdfsdk.web3 import Web3, HTTPProvider
-from htdfsdk.web3.auto import w3
-import random
 
 from .hrc20_tokens import HRC20_TOKENS
 
@@ -133,7 +127,7 @@ def hrc20_batch_transfer( token_name: str, contract_addr: str,  addrs_list: list
 def main():
     # print(get_random_amount(10, 20))
 
-    # addrs = get_addresses(PARAMETERS['ADDRESS_FILE'])
+    # addrs = get_addresses(COMMON['ADDRESS_FILE'])
     # print(len(addrs))
 
     for name, cfg in TOKEN_CFG.items():
