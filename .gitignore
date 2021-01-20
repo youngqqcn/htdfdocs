@@ -10,4 +10,4 @@ demos/java_demos/.settings
 
 demos/python_demos/.idea
 demos/python_demos/.vscode
-demos/python_demos/tools
+# demos/python_demos/tools/address.txt
