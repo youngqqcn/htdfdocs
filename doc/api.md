@@ -1,8 +1,8 @@
 ﻿# HTDF RPC接口
 
 目录
-- [创建账户)]( #创建账户) 
-- [余额查询)]( #余额查询 )
+- [创建账户]( #创建账户) 
+- [余额查询]( #余额查询 )
 - [查询账户信息]( #查询账户信息 )
 - [send转账或创建并发布智能合约]( #普通转账或创建并发布智能合约 )
 - [查账户列表]( #查账户列表 )
@@ -364,6 +364,10 @@
   - `gas_price`: 普通交易和智能合约, 此字段填`"100"`即可; 
   - `gas_wanted`: 普通HTDF转账此字段填`"30000"`即可; 智能合约交易根据实际情况而定.
 
+> 提示: 如此`/hs/send`接口遇到问题可以参考:  [send_questions.md](./send_questions.md)
+
+
+
 **例1: 普通 HTDF 转账**
 
   - 请求
@@ -404,7 +408,7 @@ curl  'http://localhost:1317/hs/send' -X POST \
   }
   ```
 
-> 提示: 如此接口遇到问题可以参考:  [常见问题及其处理.md](./常见问题及其处理.md)
+> 提示: 如此`/hs/send`接口遇到问题可以参考:  [send_questions.md](./send_questions.md)
 
 
 
@@ -475,6 +479,9 @@ curl  'http://localhost:1317/hs/send' -X POST \
 **例子 3 调用智能合约**
 
 - 见[HRC20.md](./HRC20.md)
+
+
+> 提示: 如此`/hs/send`接口遇到问题可以参考:  [send_questions.md](./send_questions.md)
 
 
 
