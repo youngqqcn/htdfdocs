@@ -20,7 +20,7 @@
 
 - 🔍[resources](./resources): 相关资源
   - [HTDF支持BIP44规范, 包含了HTDF的BIP44序号](./resources/htdf_bip44.md)
-  - [HTDF测试链公开的节点,可直接使用](./resources/htdf_testnet_ndoes.md)
+  - [HTDF测试链公开的节点,可直接使用](./resources/htdf_testnet_nodes.md)
   - [HTDF图标](./resources/htdf_logo.png)
 
 
