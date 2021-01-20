@@ -1,7 +1,7 @@
 # HTDF 文档
 
 ## 目录
-- 🔥 [常见问题汇总](./doc/FAQ.md#对接常见问题汇总)
+- 🔥 [常见问题汇总](./doc/FAQ.md#目录)
 - 📜 [doc](./doc): 包含了API文档, HRC20相关文档, 已经常见问题汇总文档
   - [api.md](./doc/api.md): API文档 
   - [FAQ.md](./doc/FAQ.md): 常见问题
