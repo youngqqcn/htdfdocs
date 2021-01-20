@@ -21,11 +21,11 @@
 
 
 ### 下载(使用浏览器进行下载)
-- 下载相应操作系统的可执行文件: 
+- 下载相应操作系统(Linux/Windows/MacOS)的可执行文件: 
 https://gitee.com/orientwalt/htdf/releases/v1.3.1
 
-- 下载配置文件(文件较大,gitee需要登录使用浏览器下载):
- https://gitee.com/orientwalt/docs/mainnet/config/config.tar.gz
+- 下载配置文件和创世文件:
+ https://gitee.com/orientwalt/docs/attach_files/593332/download/config.tar.gz
 
 
 ## 解压和部署
@@ -100,7 +100,6 @@ $tail -f ~/.hsd/restServer.log
 
 ```
 $curl http://localhost:1317/blocks/latest
-
 
 ```
 
