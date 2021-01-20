@@ -359,8 +359,8 @@
   - `account_number`：账户编号, 可通过 [查询账户信息接口](#查询账户信息)获取
   - `sequence`：序列号(账户的交易序号) , 可通过 [查询账户信息接口](#查询账户信息)获取
   - `amount`：金额
-  - `to`：接收者地址
-  - `data`: 普通HTDF转账此字段填`""`串即可;
+  - `to`：普通HTDF转账`to`为接收方地址; 若为创建智能合约`to`为空; 若为调用智能合约`to`为智能合约地址
+  - `data`: 普通HTDF转账此字段填`""`串即可; 
   - `gas_price`: 普通交易和智能合约, 此字段填`"100"`即可; 
   - `gas_wanted`: 普通HTDF转账此字段填`"30000"`即可; 智能合约交易根据实际情况而定.
 
@@ -372,32 +372,32 @@
 
   - 请求
 
-  ```shell
-curl  'http://localhost:1317/hs/send' -X POST \
--H 'Content-Type: application/json' \
--d '{ "base_req": 
-      { 
-      	"from": "htdf13fe966ffsqc3evc853ej2s8gprpzqv4yfsnfuy", 
-        "memo": "test",
-        "password": "12345678", 
-        "chain_id": "testchain", 
-        "account_number": "0", 
-        "sequence": "0", 
-        "gas_wanted": "30000",
-        "gas_price": "100", 
-        "simulate": false
-      },          
-      "amount": [ 
-          {
-          "denom": "htdf", 
-          "amount": "0.06" 
-          }
-       ],
-      "to": "htdf1rgsfxav0af8a79cmtq6rnjtjkqngl9qcj8k9l7",
-      "data": ""
-    }
-'
-  ```
+    ```shell
+    curl  'http://localhost:1317/hs/send' -X POST \
+    -H 'Content-Type: application/json' \
+    -d '{ "base_req": 
+        { 
+            "from": "htdf13fe966ffsqc3evc853ej2s8gprpzqv4yfsnfuy", 
+            "memo": "test",
+            "password": "12345678", 
+            "chain_id": "testchain", 
+            "account_number": "0", 
+            "sequence": "0", 
+            "gas_wanted": "30000",
+            "gas_price": "100", 
+            "simulate": false
+        },          
+        "amount": [ 
+            {
+            "denom": "htdf", 
+            "amount": "0.06" 
+            }
+        ],
+        "to": "htdf1rgsfxav0af8a79cmtq6rnjtjkqngl9qcj8k9l7",
+        "data": ""
+        }
+    '
+    ```
 
 - 响应 :
 
