@@ -1,315 +1,224 @@
-# 常见问题及其处理
+目录
+- [01) API文档在哪?](#1.API文档在哪?)
+- [02) 如何创建账户?](#2.如何创建账户?)
+- [03) 如何获取测试链(testchain)的测试币?](#3.如何获取测试链(testchain)的测试币?)
+- [04) 如何进行转账交易?](#4.如何进行转账交易?)
+- [05) hscli的Release版和Debug版有什么区别?](#5.`hscli`的Release版和Debug版有什么区?)
+- [06) 如何查询交易内容?](#6.如何查询交易内容?)
+- [07) 区块链浏览器网址?](#7.区块链浏览器网址?)
+- [08) 搭建全节点所需的服务器配置?](#8.搭建全节点所需的服务器配置?)
+- [09) 如何搭建节点?](#9.如何搭建节点?)
+- [10) 最小区块确认数是多少?](#10.最小区块确认数是多少?)
+- [11) 如何检验地址有效性?](#11.如何检验地址有效性?)
+- [12) token单位换算?](#12.token单位换算?)
+- [13) HTDF公链黑洞地址?](#13.HTDF公链黑洞地址?)
 
-# gas相关问题
+---
 
-- HTDF公链采用类似ETH的机制
-  > gas_price 等同于ETH 的gasPrice
+# 对接常见问题汇总
 
-  > gas_wanted 等同于ETH 的 gasLimit
+## 1.API文档在哪?
 
-- 普通交易的fee（手续费）
-  > 固定为 0.03 HTDF token
-    >> gas_price 为100  （satoshi）
+- [API文档: api.md](./api.md)
 
-    >> gas_wanted 为 30000
+---
+
+## 2.如何创建账户?
+
+- 方式1: 自行生成私钥和地址 (推荐)
+  - [python demos](../demos/python_demos/README.md)
+  - [cpp demos](../demos/cpp_demos/README.md)
+  - [golang demos](../demos/golang_demos/README.md)
+  - [nodejs demos](../demos/nodejs_demos/README.md)
+  - [java_demos](../demos/java_demos/README.md)
+
+- 方式2: 用 *Debug*版的`hscli`可执行程序, 其中包含`/accounts/newaccount` 接口, 可以方便地实现 *节点热钱包*   ( :warning: 此方式私钥存放在节点中, 不安全, 不推荐) 
+
+--- 
+
+## 3.如何获取测试链(testchain)的测试币?
+
+转账demo中的地址 `htdf1xwpsq6yqx0zy6grygy7s395e2646wggufqndml` 有一定数量的测试链(testchain)的测试币可直接使用. 
+
+---
+
+## 4.如何进行转账交易?
+
+- 方式1: 自行实现签名 , 可实现*冷钱包* (推荐)
+  - [python demos](../demos/python_demos/README.md)
+  - [cpp demos](../demos/cpp_demos/README.md)
+  - [golang demos](../demos/golang_demos/README.md)
+  - [nodejs demos](../demos/nodejs_demos/README.md)
+  - [java_demos](../demos/java_demos/README.md)
+
+- 方式2: 使用 *Debug*版的`hscli`可执行程序, 其中包含`/send` 接口, 可以方便地实现 *节点热钱包*  ( :warning: 此方式私钥存放在节点中, 不安全, 不推荐)
+
+
+
+问题延伸:
+
+**如何进行批量转账?**
+
+- 方案1： 等待区块打包
+发完一笔交易后，等待8~10秒(等待交易被打包)，再发送下一笔交易
+
+- 方案2： 改变交易的sequence, 具体实现用户参考[demos](../demos/)代码,然后根据自身实际业务需求自行修改即可. 
+
+这里以python(伪)代码, 进行算法描述:
+
+```python
+def batch_transfer(
+        htdfrpc: HtdfRPC, 
+        from_address:str, 
+        from_private_key: str, 
+        to_addresses : list):
+    """
+    batch_transfer 批量转账
+
+    htdfrpc: 封装了rpc请求的对象  
+    from_address: from地址
+    from_private_key: from地址私钥
+    to_addresses: to地址数组
+    """
+
+    account_info = htdfrpc.get_account_info(address=from_address)
+    amount_satoshi = int(0.12345678 * 10**8) 
+
+    current_sequence = account_info.sequence
+    for to_address in to_addresses:
+        
+        # 构造交易并签名
+        signed_tx = HtdfTxBuilder(
+            from_address=from_address,
+            to_address=to_address,
+            amount_satoshi=amount_satoshi,
+            sequence=current_sequence,
+            account_number=account_info.account_number,
+            chain_id=htdfrpc.chain_id,
+            gas_price=100,
+            gas_wanted=30000,
+            data='',
+            memo='test'
+        ).build_and_sign(private_key=from_private_key)
+
+        # 广播交易
+        tx_hash = htdfrpc.broadcast_tx(tx_hex=signed_tx)
+        print('tx_hash: {}'.format(tx_hash))
+
+        # 改变sequence
+        current_sequence += 1  
+    pass
+```
+
+---
+
+## 5.`hscli`的Release版和Debug版有什么区别?
+
+ :warning:  **警告: Debug版`hscli`执行程序仅用于开发测试环境, 不推荐用于生产环境** 
+
+- Debug版`hscli` 包含 `/accounts/newaccount`、`/send`等几个RPC接口,  而Release版则不包含这些接口.
+
+
+---
+
+## 6.如何查询交易内容?
+
+使用 `/txs/{txhash}` 接口查询接口 ，`txhash` 是交易hash. 
+
+> 注意: `/transaction/{hash} `是旧版（HTDF 2019）的接口, 不建议使用.
+
+详见 [api.md](./api.md)
+
+---
+
+
+## 7.区块链浏览器网址?
+
+- [HTDF 主网区块链浏览器 https://www.htdfscan.com/](https://www.htdfscan.com/)
+
+- [HTDF 测试公网(testnet) 区块链浏览器 http://test.htdfscan.com/](http://test.htdfscan.com/)
+
+---
+
+## 8.搭建全节点所需的服务器配置?
+
+|内容|建议配置|最低配置|
+|:-----:|:-----:|:-----:|
+|CPU|4核|2核|
+|内存|8G|4G|
+|磁盘|60G 可扩展|60G 可扩展|
+
+---
+
+## 9.如何搭建节点?
+
+- [搭建观察节点(主网)](../mainnet/README.md)
+
+---
+
+## 10.最小区块确认数是多少?
+
+HTDF公链不存在分叉，所以交易只需1个区块确认.
+
+---
+
+## 11.如何检验地址有效性?
+
+- 算法描述
 
   ```
-  curl --location --request POST 'http://htdf2020-test01.orientwalt.cn:1317/hs/send' \
-  --header 'Content-Type: application/json' \
-  --data-raw '    { "base_req": 
-      { "from": "htdf13fe966ffsqc3evc853ej2s8gprpzqv4yfsnfuy", 
-        "memo": "Sent via Cosmos Voyager ",
-        "password": "12345678", 
-        "chain_id": "testchain", 
-        "account_number": "0", 
-        "sequence": "0", 
-        "gas_wanted": "30000",
-        "gas_price": "100", 
-         "simulate": false
-      },          
-      "amount": [ 
-              { "denom": "htdf", 
-                "amount": "0.01" } ],
-      "to": "htdf1rgsfxav0af8a79cmtq6rnjtjkqngl9qcj8k9l7",
-    "data": ""
-  }'
-
+  (1)检查地址长度是否等于43 并且 地址是否全部为小写字符, 如果满足条件则进入(2), 否则地址非法;
+  (2)使用bech32_decode对地址进行解码, 检查地址是否符合bech32编码规则, 如果能正常解码则进入(3),否则地址非法;
+  (3)检查bech32_decode返回值, 检查前缀是否为"htdf" 并且 字节数组长度是否为32, 如果符合条件则地址有效; 否则地址非法.
   ```
 
+- Python3实现
 
-
-# 节点搭建
-
-- 节点搭建
-  > [本地观察节点](https://gitee.com/orientwalt/apidoc_2020/tree/master/%E6%90%AD%E5%BB%BA%E6%9C%AC%E5%9C%B0%E8%A7%82%E5%AF%9F%E8%8A%82%E7%82%B9) 
-
-  > [测试公网观察节点](https://gitee.com/orientwalt/apidoc_2020/tree/master/测试公网观察节点)
-
-- 正常现象
-  > 同步速度较快，网络基本没有什么波动
-
-- 可能出现的错误
-  >  同步区块速度过慢---正常情况主网110万块大约时间4H
-  >>  1.cpu占用率过高 --关掉其他的服务
-
-  >>  2.内存过小      --加内存
-
-  >>  3.网络速度      --如果是云服务器加带宽    
-
-# 发送交易
-## /send 转账接口
-```
-curl --location --request POST 'http://htdf2020-test01.orientwalt.cn:1317/hs/send' \
---header 'Content-Type: application/json' \
---data-raw '    { "base_req": 
-      { "from": "htdf13fe966ffsqc3evc853ej2s8gprpzqv4yfsnfuy", 
-        "memo": "Sent via Cosmos Voyager ",
-        "password": "12345678", 
-        "chain_id": "testchain", 
-        "account_number": "0", 
-        "sequence": "0", 
-        "gas_wanted": "30000",
-        "gas_price": "100", 
-         "simulate": false
-      },          
-      "amount": [ 
-              { "denom": "htdf", 
-                "amount": "0.06" } ],
-      "to": "htdf1rgsfxav0af8a79cmtq6rnjtjkqngl9qcj8k9l7",
-      "data": ""
-    }
-    
-    '
-```
-## 返回
-```
-// 1.首先返回
-{
-  "height": "0",
-  "txhash": "30B2D681459610E7BDA731B1009FAFDF5D3080D9E94D15AE245C3A71A7039075"
-}
-//至此交易不一定正确，需要继续查询交易
-~$ curl http://localhost:1317/txs/30B2D681459610E7BDA731B1009FAFDF5D3080D9E94D15AE245C3A717039075
-{
-  "height": "4680",
-  "txhash": "30B2D681459610E7BDA731B1009FAFDF5D3080D9E94D15AE245C3A71A7039075",
-  "log": [
-    {
-      "msg_index": "0",
-      "success": true,
-      "log": ""
-    }
-  ],
-  "gas_wanted": "30000",
-  "gas_used": "32970",
-  "tags": [
-    {
-      "key": "action",
-      "value": "sendfrom"
-    },
-    {
-      "key": "sender",
-      "value": "htdf1d8walt2k5824v4zxz6wp6n0mk7z6ml7f2mdagn"
-    },
-    {
-      "key": "recipient",
-      "value": "htdf1g9jlhyu07jjm4gfus52l28r29y4m063gmtxcx0"
-    }
-  ],
-  "tx": {
-    "msg": [
-      {
-        "From": "htdf1d8walt2k5824v4zxz6wp6n0mk7z6ml7f2mdagn",
-        "To": "htdf1g9jlhyu07jjm4gfus52l28r29y4m063gmtxcx0",
-        "Amount": [
-          {
-            "denom": "htdf",
-            "amount": "10"
-          }
-        ],
-        "Hash": "",
-        "Memo": ""
-      }
-    ],
-    "fee": {
-      "amount": [
-        {
-          "denom": "htdf",
-          "amount": "20"
-        }
-      ],
-      "gas": "0.002"
-    },
-    "signatures": [
-      {
-        "pub_key": {
-          "type": "tendermint/PubKeySecp256k1",
-          "value": "A0BzWlukxj28cCB0MhN8ioZzPUoF/zkTGBHzb1jDkX1d"
-        },
-        "signature": "9k3UY5yfSxIVfyPrLoh8C6rrCs/tDHd89kmNwiIEJEhRIbmlTkbnvCN62PuXwEQbNyaTzxGBmPe7U/9nHMteHA=="
-      }
-    ],
-    "memo": "Sent via Cosmos Voyager"
-  }
-}
-```
-## 正确标志
-
-1. 首先send发送交易，返回height和txhash
-2. 然后查询txhash，查看返回的log字段
-3. log字段"success": true,则交易成功
-
-## 可能出现的错误
-
-### a.余额不足
-```
-  TxHash: 638CB8A0C88E6874DF063EAD8BD76935B161D7EB46958B5A09736612DC9FF314
-  Code: 10
-  Raw Log: [{"msg_index":"0","success":false,"log":"{\"codespace\":\"sdk\",\"code\":10,\"message\":\"insufficient account funds; 1999990000satoshi \u003c 2000000000satoshi\"}"}]
-  Logs: [{"msg_index":0,"success":false,"log":"{\"codespace\":\"sdk\",\"code\":10,\"message\":\"insufficient account funds; 1999990000satoshi \u003c 2000000000satoshi\"}"}]
-  GasWanted: 200000
-  GasUsed: 15203
-
-```
-解决方案
-```
-转账金额to = from资金 - fee;
-自己先算好资金，在进行转账
-```
-### b. signation error
-
->> 如果是在搭建的节点进行转账，出现单纯的签名错误且地址不是本地生成的，可能是.hscli下keystore下面没有key文件
-
-解决方案
->> 将key文件，拷贝到对应目录
-
-### c. 转账交易的特殊性
->> 同一个转出地址，同一个区块内，memo需要确保唯一； 否则会报交易已存在错误
-
-```
-{"error":"broadcast_tx_sync: Response error: RPC error -32603 - Internal error: Tx already exists in cache"}
-```
-解决方案
-
-
-- 方案1（简单方案）：等待区块打包
-  > 发完一笔交易后，sleep 8~10秒（即等待上一笔打包），再发下一笔交易
-
-
-- 方案2（完整的通用方案）：改变seq和memo
-  > 参考一：详见下方伪代码
+  ```python
+  def is_valid_address(address: str) -> bool:
+      # (1)检查地址长度是否等于43 并且 地址是否全部为小写字符, 如果满足条件则进入(2), 否则地址非法;
+      if not (len(address) == 43 and address.islower()):
+          return False
+      # (2)使用bech32_decode对地址进行解码, 检查地址是否符合bech32编码规则, 如果能正常解码则进入(3),否则地址非法;
+      prefix, data = bech32_decode(address)
+      if prefix is None or data is None:
+          return False
+      # (3)检查bech32_decode返回值, 检查前缀是否为"htdf" 并且 字节数组长度是否为32, 如果符合条件则地址有效; 否则地址非法.
+      if prefix == 'htdf' and len(data) == 32:
+          return True
+      return False
+  ```
   
-  > 参考二：[离线签名demo](https://gitee.com/orientwalt/apidoc/tree/master/demo) 
+  
+  
+- Javascript实现, 见[JavaScript_离线签名交易demo](./demo/nodejs_demos/htdf_demos/htdf_transfer.js)
 
+ - [golang源码例子](./demo/golang_bech32)
+
+ - 其他语言的可以参考`demo`目录下不同语言示例的`bech32`解码函数自行实现
+
+---
+
+## 12.token单位换算?
+
+- 我们的数量单位，完全参考BTC
+- 两个数量单位 HTDF、satoshi（聪）
+- 最小单位是 satoshi（聪）
 
 ```
-
-## 伪代码，关于 sequence 和 memo 字段
->> 指定的转出地址， 每笔交易的sequence 和 memo ，必须有唯一性=
->> sequence 依次递增， memo 建议也依次递增；
-
-
-//应用启动
-
-//查询 seq
-currSeq = GetSeqFromRPC()
-
-while(1)
-{
-    //获取转出地址currToAddress 、转出金额 currAmount
-    currToAddress = getToAddressFromParam();
-    currAmount = getAmountFromParam();
-    
-    while(1)
-    {
-
-        //交易数据格式
-        currPostData= {
-                Sequence : currSeq,
-                Memo :  "memo_currSeq",
-                ToAddress: currToAddress, 
-                Amount: currAmount
-             }
-
-        //发送交易
-        send( currPostData) ;
-
-        //交易发送成功，则 seq加1
-         if 发送交易成功
-         {
-             currSeq++;
-             break;
-         }
-
-        //睡眠和重试  
-         sleep(1);
-
-    }
-     
-}
-
+1 HTDF =  100000000 satoshi（聪）
+1 satoshi（聪） = 0.00000001 HTDF
 ```
 
 
-### d.chainID问题
+---
 
-请注意交易所在链--主网mainchain，测试公网testchain
+## 13.HTDF公链黑洞地址?
+黑洞地址一般用于做币销毁相关业务；
 
-### e.关于普通交易gas相关字段
+HTDF公链（建议的）黑洞地址如下：
 
-普通交易fee固定为 0.03 HTDF
-
-即 gas_wanted 固定为 30000, gas_price 固定为 gas_price 
-
-如下
-
-```
-curl --location --request POST 'http://htdf2020-test01.orientwalt.cn:1317/hs/send' \
---header 'Content-Type: application/json' \
---data-raw '    { "base_req": 
-      { "from": "htdf13fe966ffsqc3evc853ej2s8gprpzqv4yfsnfuy", 
-        "memo": "Sent via Cosmos Voyager ",
-        "password": "12345678", 
-        "chain_id": "testchain", 
-        "account_number": "0", 
-        "sequence": "0", 
-        "gas_wanted": "30000",
-        "gas_price": "100", 
-         "simulate": false
-      },          
-      "amount": [ 
-              { "denom": "htdf", 
-                "amount": "0.06" } ],
-      "to": "htdf1rgsfxav0af8a79cmtq6rnjtjkqngl9qcj8k9l7",
-      "data": ""
-    }
-    
-    '
-```
-
-
-
-## /broadcast 广播接口
-- 成功应答
-
-```
-{
-  "height":...,
-  "txhash":..., 
-}
-```
-- 错误应答
-> 注意这个时候多了 `code`和 `raw_log` 两个字段； 而且 `txHash` 是有值的；
-```
-
-{
-  "height":...,
-  "txhash":...,
-  "code":...,
-  "raw_log":...}
-}
-```
-
-
-
-
+|地址|说明|
+|:-----:|:-----:|
+|htdf1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq0d4n7t|参考ETH最出名的黑洞地址全零地址`0x0000000000000000000000000000000000000000`，转换为对应HTDF地址为：`htdf1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq0d4n7t`， 转换过程为 `hscli bech32 h2b 0000000000000000000000000000000000000000`，详见[Bech32地址和HEX-20地址的转换](./HRC20.md) |
+|htdf100000000000000000000000000000000zpjht5|"全零"地址，除了末尾的"zpjht5"校验和|

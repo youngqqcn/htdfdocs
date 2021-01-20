@@ -1,19 +1,19 @@
 ﻿# HTDF RPC接口
 
 目录
-- [余额查询]( #余额查询 )
+- [创建账户)]( #创建账户) 
+- [余额查询)]( #余额查询 )
 - [查询账户信息]( #查询账户信息 )
-- [创建账户]( #创建账户) 
-- [导出账户私钥]( #导出账户私钥 )
+- [send转账或创建并发布智能合约]( #普通转账或创建并发布智能合约 )
 - [查账户列表]( #查账户列表 )
 - [查询最新区块]( #查询最新区块 )
 - [查询区块内容]( #查询区块内容 )
 - [查询节点信息]( #查询节点信息 )
 - [查询验证节点信息]( #查询验证节点信息 )
-- [普通转账或创建并发布智能合约]( #普通转账或创建并发布智能合约 )
 - [查询交易详情]( #查询交易详情 )
 - [创建原始交易或智能合约交易]( #创建原始交易或智能合约交易 )
 - [在线签名]( #在线签名 )
+- [导出账户私钥]( #导出账户私钥 )
 - [广播已签名的交易]( #广播已签名的交易 )
 - [查询账户在某区块高度范围内的交易]( #查询账户在某区块高度范围内的交易)
 - [查询交易池中未确认的所有交易详情](#查询交易池中未确认的所有交易详情)
@@ -24,6 +24,32 @@
 - [查询未确认交易数量]( #查询未确认交易数量 )
 - [查询未确认交易详情]( #查询未确认交易详情 )
 
+---
+
+## 创建账户
+
+:warning: *警告: 仅限于Debug 版`hscli`, 用于热钱包(简单方便但不安全, 不推荐使用) , 推荐自行参考`demo`生成地址*
+
+- HTTP请求方法：   `POST` 
+
+- endpoint:    `/accounts/newaccount`
+- 标注：   仅限于Debug 版`hscli`, 用于热钱包(简单方便但不安全, 不推荐使用) , 推荐自行参考`demo`生成地址
+- 说明：   参数password是为新账户设置的密码
+
+- 请求： 
+
+  ```shell
+  curl -X POST "http://localhost:1317/accounts/newaccount" -H "accept: application/json" -d "{\"password\": \"12345678\"}"
+  ```
+
+- 响应 :
+  ```json
+  {
+    "address": "htdf1g9jlhyu07jjm4gfus52l28r29y4m063gmtxcx0"
+  }
+  ```
+
+---
 
 
 ## 余额查询
@@ -51,7 +77,7 @@
   ]
   ```
 
-
+---
 
 ##  查询账户信息
 - HTTP请求方法：   `GET`    
@@ -83,59 +109,7 @@
   ```
 
 
-## 创建账户
-
-:warning: *警告: 仅限于Debug 版`hscli`, 用于热钱包(简单方便但不安全, 不推荐使用) , 推荐自行参考`demo`生成地址*
-
-- HTTP请求方法：   `POST` 
-
-- endpoint:    `/accounts/newaccount`
-- 标注：   仅限于Debug 版`hscli`, 用于热钱包(简单方便但不安全, 不推荐使用) , 推荐自行参考`demo`生成地址
-- 说明：   参数password是为新账户设置的密码
-
-- 请求： 
-
-  ```shell
-  curl -X POST "http://localhost:1317/accounts/newaccount" -H "accept: application/json" -d "{\"password\": \"12345678\"}"
-  ```
-
-- 响应 :
-  ```json
-  {
-    "address": "htdf1g9jlhyu07jjm4gfus52l28r29y4m063gmtxcx0"
-  }
-  ```
-
-
-##  导出账户私钥
-
- :warning: *警告: 仅限于Debug 版`hscli`, 用于热钱包(简单方便但不安全, 不推荐使用) , 推荐自行参考`demo`生成私钥*
-
-- HTTP请求方法：  `POST`
-
-- endpoint:    `/accounts/export`
-- 标注：   仅限于Debug 版`hscli`, 用于热钱包(简单方便但不安全, 不推荐使用) , 推荐自行参考`demo`生成私钥
-- 说明：   `password`  是使用 ` /accounts/newaccount` 接口创建账户时设置的钱包密码
-
-- 请求： 
-
-  ```shell
-  curl --location --request POST 'http://localhost:1317/accounts/export' \
-  --header 'Content-Type: application/json' \
-  --data-raw '{
-    "address": "htdf10v3ewq09lq5m0mgd36x0g9stuhhgwffx0lmf3x",
-    "password": "12345678"
-  }'
-  ```
-
-- 响应 :
-  
-  ```json
-  {
-    "private_key": "8b24610a3cbfb4491f3ed88325a28254cdcea89f5cf507df62ab2c06b211edbc"
-  }
-  ```
-
+---
 
 ##  查账户列表
 - HTTP请求方法：    `GET` 
@@ -157,6 +131,7 @@
   Account #5: {htdf1g9jlhyu07jjm4gfus52l28r29y4m063gmtxcx0}
   ```
 
+---
 
 ##  查询最新区块
 - HTTP请求方法：    `GET` 
@@ -273,6 +248,7 @@
   ```
 
 
+---
 
 ##  查询区块内容
 
@@ -365,65 +341,7 @@
 
 
 
-##  查询节点信息
-- HTTP请求方法：    `GET` 
-- endpoint:   `/node_info`
-
-- 请求： 
-
-  ```
-  curl http://localhost:1317/node_info
-  ```
-
-- 响应 :
-
-  ```json
-  {
-    "protocol_version": {
-      "p2p": "7",
-      "block": "10",
-      "app": "0"
-    },
-    "id": "007e8043c33e216643ce96988eaa945b0bd6abb8",
-    "listen_addr": "tcp://0.0.0.0:26656",
-    "network": "testchain",
-    "version": "0.31.5",
-    "channels": "4020212223303800",
-    "moniker": "htdf_dev_net",
-    "other": {
-      "tx_index": "on",
-      "rpc_address": "tcp://0.0.0.0:26657"
-    }
-  }
-  ```
-
-
-##  查询验证节点信息
-
-- HTTP请求方法：    `GET` 
-- endpoint:    `/validatorsets/latest`
-
-- 请求： 
-
-  ```shell
-  curl http://localhost:1317/validatorsets/latest
-  ```
-
-- 响应 :
-
-  ```json
-  {
-    "block_height": "4494",
-    "validators": [
-      {
-        "address": "htdfvalcons1jcxxy3k4e7mv9edagrj9svtktnx0khnyqgpc4v",
-        "pub_key": "htdfvalconspub1zcjduepqrnpf2jkfrn20rwvwavxut9va36rjxrxrnxz6e3teagnumvzqr0qqrakqmf",
-        "proposer_priority": "0",
-        "voting_power": "100"
-      }
-    ]
-  }
-  ```
+---
 
 ##  普通转账或创建并发布智能合约
 
@@ -434,17 +352,19 @@
 - endpoint:     `/hs/send`
 - 标注：   仅限于Debug 版`hscli`;  智能合约后续版本实现；
 - 说明：  
-  -  `from`: 发送者地址，
-  - `memo`：备注， 
+  - `from`: 发送方地址，
+  - `memo`：转账备注， 
   - `password` ：密码
-  - `chain_id`：链id , `testchain` :测试网 , `mainchain`:主网
-  -  `account_number`：账户编号, 可通过 [查询账户信息接口](#查询账户信息)获取
+  - `chain_id`：链类型:`mainchain`: 主网 ;  `testchain` : 测试网 
+  - `account_number`：账户编号, 可通过 [查询账户信息接口](#查询账户信息)获取
   - `sequence`：序列号(账户的交易序号) , 可通过 [查询账户信息接口](#查询账户信息)获取
   - `amount`：金额
-  -  `to`：接收者地址
-  -  `data`: 普通HTDF转账, 此字段填空字符串即可
+  - `to`：接收者地址
+  - `data`: 普通HTDF转账此字段填`""`串即可;
+  - `gas_price`: 普通交易和智能合约, 此字段填`"100"`即可; 
+  - `gas_wanted`: 普通HTDF转账此字段填`"30000"`即可; 智能合约交易根据实际情况而定.
 
-**例1: HTDF 转账**
+**例1: 普通 HTDF 转账**
 
   - 请求
 
@@ -454,12 +374,12 @@ curl  'http://localhost:1317/hs/send' -X POST \
 -d '{ "base_req": 
       { 
       	"from": "htdf13fe966ffsqc3evc853ej2s8gprpzqv4yfsnfuy", 
-        "memo": "Sent via Cosmos Voyager ",
+        "memo": "test",
         "password": "12345678", 
         "chain_id": "testchain", 
         "account_number": "0", 
         "sequence": "0", 
-        "gas_wanted": "200000",
+        "gas_wanted": "30000",
         "gas_price": "100", 
         "simulate": false
       },          
@@ -486,7 +406,12 @@ curl  'http://localhost:1317/hs/send' -X POST \
 
 > 提示: 如此接口遇到问题可以参考:  [常见问题及其处理.md](./常见问题及其处理.md)
 
-**例子 2 智能合约**
+
+
+**例子 2 创建智能合约**
+
+注意事项:
+  1. 创建智能合约时`to`设置为空; 调用智能合约时`to`填写智能合约的地址
 
 - 请求
 
@@ -511,7 +436,7 @@ curl  'http://localhost:1317/hs/send' -X POST \
                       "amount": "0"
                   }],
                   "to": "",
-                  "data": "6060604052341561000f57600080fd5b336000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555061042d8061005e6000396000f300606060405260043610610062576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff168063075461721461006757806327e235e3146100bc57806340c10f1914610109578063d0679d341461014b575b600080fd5b341561007257600080fd5b61007a61018d565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b34156100c757600080fd5b6100f3600480803573ffffffffffffffffffffffffffffffffffffffff169060200190919050506101b2565b6040518082815260200191505060405180910390f35b341561011457600080fd5b610149600480803573ffffffffffffffffffffffffffffffffffffffff169060200190919080359060200190919050506101ca565b005b341561015657600080fd5b61018b600480803573ffffffffffffffffffffffffffffffffffffffff16906020019091908035906020019091905050610277565b005b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b60016020528060005260406000206000915090505481565b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614151561022557610273565b80600160008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600082825401925050819055505b5050565b80600160003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000205410156102c3576103fd565b80600160003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000206000828254039250508190555080600160008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600082825401925050819055507f3990db2d31862302a685e8086b5755072a6e2b5b780af1ee81ece35ee3cd3345338383604051808473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001828152602001935050505060405180910390a15b50505600a165627a7a72305820f3c54d8cf0c62d5295ef69e3fc795fa1886b4de4d3d58f50f83c70ed26b99d890029"
+                  "data": "6060604052341561000f57600080fd====> 此处省略几千字符 <=====f50f83c70ed26b99d890029"
               }'
   ```
 
@@ -520,9 +445,40 @@ curl  'http://localhost:1317/hs/send' -X POST \
   ```json
   {
     "height": "0",
-    "txhash": "2F7B060935C70BFB474C4A4DDD1692B019CF3DED9A412C2362ABD7E76F31EB59"
+    "txhash": "cce1f3234a816a7e023c3730a48a53d78da381a59faa82c5af488bd74d04e44c"
   }
   ```
+
+- 如果时新建智能合约, 获取刚刚创建的智能合约的地址:
+
+    ```
+    curl localhost:1317/txs/cce1f3234a816a7e023c3730a48a53d78da381a59faa82c5af488bd74d04e44c
+
+    {
+        "height": "2234819",
+        "txhash": "CCE1F3234A816A7E023C3730A48A53D78DA381A59FAA82C5AF488BD74D04E44C",
+        "raw_log": "[{\"msg_index\":\"0\",\"success\":true,\"log\":\"{\\\"code\\\":0,\\\"message\\\":\\\"ok\\\",\\\"contract_address\\\":\\\"htdf18xq0p7h8rwxykfyrfytylhmrtusmzfwst4s6jx\\\",\\\"evm_output\\\":\\\"\\\"}\"}]",
+        "logs": [
+            {
+                "msg_index": "0",
+                "success": true,
+                "log": "{\"code\":0,\"message\":\"ok\",\"contract_address\":\"htdf18xq0p7h8rwxykfyrfytylhmrtusmzfwst4s6jx\",\"evm_output\":\"\"}"
+            }
+        ],
+
+        // 其他字段 略
+    }
+    ```
+    其中`logs`字段中的 `"contract_address"`就是新建的合约地址
+
+
+**例子 3 调用智能合约**
+
+- 见[HRC20.md](./HRC20.md)
+
+
+
+---
 
 
 ##  查询交易详情
@@ -610,71 +566,134 @@ curl  'http://localhost:1317/hs/send' -X POST \
   ```
 
 
-- 2.智能合约交易的响应
+- 2.创建智能合约交易的响应
 
-  ```json
-  {
-      "height": "362",
-      "txhash": "12E458B3E3C9ECC4D0E3628E29F5BE534D619DE8F68C1F1FBCA592989A8EB99F",
-      "raw_log": "[{\"msg_index\":\"0\",\"success\":true,\"log\":\"{\\\"code\\\":0,\\\"message\\\":\\\"ok\\\",\\\"contract_address\\\":\\\"htdf1zuvnu4hlwlpnh0mwj4w5htcx3mgvx3t4zfzaut\\\",\\\"evm_output\\\":\\\"\\\"}\"}]",
-      "logs": [
-          {
-              "msg_index": "0",
-              "success": true,
-              "log": "{\"code\":0,\"message\":\"ok\",\"contract_address\":\"htdf1zuvnu4hlwlpnh0mwj4w5htcx3mgvx3t4zfzaut\",\"evm_output\":\"\"}"
-          }
-      ],
-      "gas_wanted": "5000000",
-      "gas_used": "1025316",
-      "tags": [
-          {
-              "key": "action",
-              "value": "send"
-          }
-      ],
-      "tx": {
-          "type": "auth/StdTx",
-          "value": {
-              "msg": [
-                  {
-                      "type": "htdfservice/send",
-                      "value": {
-                          "From": "htdf13fe966ffsqc3evc853ej2s8gprpzqv4yfsnfuy",
-                          "To": "",
-                          "Amount": [
-                              {
-                                  "denom": "satoshi",
-                                  "amount": "0"
-                              }
-                          ],
-                          "Data": "60606040526000600260006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550341561005157600080fd5b6aa49be39dc14cb8270000006003819055506003546000803373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002081905550610d61806100b76000396000f3006060604052600436106100af576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806306fdde03146100b4578063095ea7b31461014257806318160ddd1461019c57806323b872dd146101c5578063313ce5671461023e5780634d853ee51461026d57806370a08231146102c257806393c32e061461030f57806395d89b4114610348578063a9059cbb146103d6578063dd62ed3e14610430575b600080fd5b34156100bf57600080fd5b6100c761049c565b6040518080602001828103825283818151815260200191508051906020019080838360005b838110156101075780820151818401526020810190506100ec565b50505050905090810190601f1680156101345780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b341561014d57600080fd5b610182600480803573ffffffffffffffffffffffffffffffffffffffff169060200190919080359060200190919050506104d5565b604051808215151515815260200191505060405180910390f35b34156101a757600080fd5b6101af61065c565b6040518082815260200191505060405180910390f35b34156101d057600080fd5b610224600480803573ffffffffffffffffffffffffffffffffffffffff1690602001909190803573ffffffffffffffffffffffffffffffffffffffff16906020019091908035906020019091905050610662565b604051808215151515815260200191505060405180910390f35b341561024957600080fd5b610251610959565b604051808260ff1660ff16815260200191505060405180910390f35b341561027857600080fd5b61028061095e565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b34156102cd57600080fd5b6102f9600480803573ffffffffffffffffffffffffffffffffffffffff16906020019091905050610984565b6040518082815260200191505060405180910390f35b341561031a57600080fd5b610346600480803573ffffffffffffffffffffffffffffffffffffffff169060200190919050506109cc565b005b341561035357600080fd5b61035b610a6c565b6040518080602001828103825283818151815260200191508051906020019080838360005b8381101561039b578082015181840152602081019050610380565b50505050905090810190601f1680156103c85780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b34156103e157600080fd5b610416600480803573ffffffffffffffffffffffffffffffffffffffff16906020019091908035906020019091905050610aa5565b604051808215151515815260200191505060405180910390f35b341561043b57600080fd5b610486600480803573ffffffffffffffffffffffffffffffffffffffff1690602001909190803573ffffffffffffffffffffffffffffffffffffffff16906020019091905050610c77565b6040518082815260200191505060405180910390f35b6040805190810160405280600981526020017f414a4320636861696e000000000000000000000000000000000000000000000081525081565b60008082148061056157506000600160003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002054145b151561056c57600080fd5b81600160003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055508273ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff167f8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925846040518082815260200191505060405180910390a36001905092915050565b60035481565b600080600160008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020549050600073ffffffffffffffffffffffffffffffffffffffff168473ffffffffffffffffffffffffffffffffffffffff161415151561072057600080fd5b80831115151561072f57600080fd5b610780836000808873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002054610cfe90919063ffffffff16565b6000808773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002081905550610813836000808773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002054610d1790919063ffffffff16565b6000808673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055506108688382610cfe90919063ffffffff16565b600160008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055508373ffffffffffffffffffffffffffffffffffffffff168573ffffffffffffffffffffffffffffffffffffffff167fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef856040518082815260200191505060405180910390a360019150509392505050565b601281565b600260009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b60008060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020549050919050565b600260009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16141515610a2857600080fd5b80600260006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555050565b6040805190810160405280600381526020017f414a43000000000000000000000000000000000000000000000000000000000081525081565b60008073ffffffffffffffffffffffffffffffffffffffff168373ffffffffffffffffffffffffffffffffffffffff1614151515610ae257600080fd5b610b33826000803373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002054610cfe90919063ffffffff16565b6000803373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002081905550610bc6826000808673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002054610d1790919063ffffffff16565b6000808573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055508273ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff167fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef846040518082815260200191505060405180910390a36001905092915050565b6000600160008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002054905092915050565b6000828211151515610d0c57fe5b818303905092915050565b6000808284019050838110151515610d2b57fe5b80915050929150505600a165627a7a7230582043a3cd97586e182885676a8c6e6413be040c6f728b9763d794ecdbfff9a4b7c90029",
-                          "GasPrice": "100",
-                          "GasWanted": "5000000"
-                      }
-                  }
-              ],
-              "fee": {
-                  "gas_wanted": "5000000",
-                  "gas_price": "100"
-              },
-              "signatures": [
-                  {
-                      "pub_key": {
-                          "type": "tendermint/PubKeySecp256k1",
-                          "value": "A2t2ZhUf8W2rq3TEDCmYJCJ7Qrermowx4TR5MzDC4nOE"
-                      },
-                      "signature": "DhhCSLCFABO+ZfNFR/qoZJn5v1JXsBk+9IUFdD98qJ1YvxfgCeZpYEvUtenV6ojU17u8QnEMAV2P7gqBthxMpg=="
-                  }
-              ],
-              "memo": "contract test"
-          }
-      },
-      "timestamp": "2020-04-06T10:17:02Z"
-  }
+    ```json
+    {
+        "height": "2234819",
+        "txhash": "CCE1F3234A816A7E023C3730A48A53D78DA381A59FAA82C5AF488BD74D04E44C",
+        "raw_log": "[{\"msg_index\":\"0\",\"success\":true,\"log\":\"{\\\"code\\\":0,\\\"message\\\":\\\"ok\\\",\\\"contract_address\\\":\\\"htdf18xq0p7h8rwxykfyrfytylhmrtusmzfwst4s6jx\\\",\\\"evm_output\\\":\\\"\\\"}\"}]",
+        "logs": [
+            {
+                "msg_index": "0",
+                "success": true,
+                "log": "{\"code\":0,\"message\":\"ok\",\"contract_address\":\"htdf18xq0p7h8rwxykfyrfytylhmrtusmzfwst4s6jx\",\"evm_output\":\"\"}"
+            }
+        ],
+        "gas_wanted": "12345678",
+        "gas_used": "1025316",
+        "tags": [
+            {
+                "key": "action",
+                "value": "send"
+            }
+        ],
+        "tx": {
+            "type": "auth/StdTx",
+            "value": {
+                "msg": [
+                    {
+                        "type": "htdfservice/send",
+                        "value": {
+                            "From": "htdf1uc5t3x8a7gxhnard7mwu6n4sx5jfh54znzxj8x",
+                            "To": "",
+                            "Amount": [
+                                {
+                                    "denom": "satoshi",
+                                    "amount": "0"
+                                }
+                            ],
+                            "Data": "606060405260006002600====> 此处省略几千个字符<===0929e4f365d480e83063f02298b7dd20029",
+                            "GasPrice": "100",
+                            "GasWanted": "1200000"
+                        }
+                    }
+                ],
+                "fee": {
+                    "gas_wanted": "12345678",
+                    "gas_price": "100"
+                },
+                "signatures": [
+                    {
+                        "pub_key": {
+                            "type": "tendermint/PubKeySecp256k1",
+                            "value": "AonkvtOFmofOjpRThnmaTLr2MqYW5zEbTLqN5nUwy+xe"
+                        },
+                        "signature": "VvuEMuzEuLxO38IxHaihHjBdjEmzA7l/pbSBsdyWyyhTkXPxcI4GrwttDHMYljU9UU0MKF8ZliF/63Rw1wFLcg=="
+                    }
+                ],
+                "memo": ""
+            }
+        },
+        "timestamp": "2020-08-03T16:01:16Z"
+    }
+    ```
 
-  ```
+- 3.调用智能合约
+这里以HRC20的转账为例:
 
-- 3.扩展型交易的响应
+    ```json
+        {
+            "height": "4780206",
+            "txhash": "09197DE04389777C02B683894F3294D624A1F9BD64EEAC5C8A890B83F1F14A30",
+            "raw_log": "[{\"msg_index\":\"0\",\"success\":true,\"log\":\"{\\\"code\\\":0,\\\"message\\\":\\\"ok\\\",\\\"contract_address\\\":\\\"\\\",\\\"evm_output\\\":\\\"0000000000000000000000000000000000000000000000000000000000000001\\\"}\"}]",
+            "logs": [
+                {
+                    "msg_index": "0",
+                    "success": true,
+                    "log": "{\"code\":0,\"message\":\"ok\",\"contract_address\":\"\",\"evm_output\":\"0000000000000000000000000000000000000000000000000000000000000001\"}"
+                }
+            ],
+            "gas_wanted": "200000",
+            "gas_used": "90604",
+            "tags": [
+                {
+                    "key": "action",
+                    "value": "send"
+                }
+            ],
+            "tx": {
+                "type": "auth/StdTx",
+                "value": {
+                    "msg": [
+                        {
+                            "type": "htdfservice/send",
+                            "value": {
+                                "From": "htdf1eq9n000kaveckx00g72usncm5qtdu8fgtq0uja",
+                                "To": "htdf18xq0p7h8rwxykfyrfytylhmrtusmzfwst4s6jx",
+                                "Amount": [
+                                    {
+                                        "denom": "satoshi",
+                                        "amount": "0"
+                                    }
+                                ],
+                                "Data": "a9059cbb0000000000000000000000003f63d0a97bdeb940dfed3a40d7d0ca67d742e35c0000000000000000000000000000000000000000000004b828c5a63d76000000",
+                                "GasPrice": "100",
+                                "GasWanted": "200000"
+                            }
+                        }
+                    ],
+                    "fee": {
+                        "gas_wanted": "200000",
+                        "gas_price": "100"
+                    },
+                    "signatures": [
+                        {
+                            "pub_key": {
+                                "type": "tendermint/PubKeySecp256k1",
+                                "value": "AvxW40vNFF/4rfBj53httsdEl9FeBJPZX3QnSS0PdsZ2"
+                            },
+                            "signature": "IFEIVunhDdp8KoFSUYpTBpHOnUygy3hTSMEjU88lx/VqqgxvLFT6Kefni2uqTrYtHa13EJrKgJpG2udVMTTqhw=="
+                        }
+                    ],
+                    "memo": "糖果"
+                }
+            },
+            "timestamp": "2021-01-19T07:54:03Z"
+        }
+    ```
+
+- 4.扩展型交易的响应
 
   ```json
   {
@@ -743,7 +762,7 @@ curl  'http://localhost:1317/hs/send' -X POST \
 
 
 
-
+---
 
 ## 创建原始交易或智能合约交易
 
@@ -807,7 +826,7 @@ curl  'http://localhost:1317/hs/send' -X POST \
   ```
   
   
-
+---
 
 ## 在线签名
 
@@ -843,6 +862,7 @@ curl -X POST "http://localhost:1317/hs/sign" -H "accept: application/json" -H "C
 7b0a20202274797065223a2022617574682f5374645478222c0a20202276616c7565223a207b0a20202020226d7367223a205b0a2020202020207b0a20202020202020202274797065223a202268746466736572766963652f73656e64222c0a20202020202020202276616c7565223a207b0a202020202020202020202246726f6d223a2022687464663165787078706b336b307737637065303630376b75686a6e6d78786c78347174633866637a3775222c0a2020202020202020202022546f223a20226874646631787774713775326d6b68793935677576786d3473326879306561307061726c796a74756c6736222c0a2020202020202020202022416d6f756e74223a205b0a2020202020202020202020207b0a20202020202020202020202020202264656e6f6d223a20227361746f736869222c0a202020202020202020202020202022616d6f756e74223a202231303030303030303030220a2020202020202020202020207d0a202020202020202020205d0a20202020202020207d0a2020202020207d0a202020205d2c0a2020202022666565223a207b0a20202020202022616d6f756e74223a205b0a20202020202020207b0a202020202020202020202264656e6f6d223a20227361746f736869222c0a2020202020202020202022616d6f756e74223a202232303030303030303030220a20202020202020207d0a2020202020205d2c0a20202020202022676173223a20223230303030303030303030303030220a202020207d2c0a20202020227369676e617475726573223a205b0a2020202020207b0a2020202020202020227075625f6b6579223a207b0a202020202020202020202274797065223a202274656e6465726d696e742f5075624b6579536563703235366b31222c0a202020202020202020202276616c7565223a2022417774656833714255664630304855796450722b78326f354c79676c4f5a2f4e36372b414c66685a7a4e7672220a20202020202020207d2c0a2020202020202020227369676e6174757265223a20224c38684b56454f467435586a4c754770496939503533496b4f4d66593064516f4e786532656d397945534e70334a476a747767365a61733261576954716f556b4a763659446d33524e4a4d592f2b37424c76346c56413d3d220a2020202020207d0a202020205d2c0a20202020226d656d6f223a202253656e742076696120436f736d6f7320566f7961676572220a20207d0a7d
 ```
 
+---
 
 ## 广播已签名的交易
 
@@ -879,6 +899,8 @@ curl -X POST "http://localhost:1317/hs/sign" -H "accept: application/json" -H "C
   }
   ```
 
+---
+
 ##  查询账户在某区块高度范围内的交易 
 
 - HTTP请求方法：`POST`
@@ -905,6 +927,40 @@ curl -X POST "http://localhost:1317/hs/sign" -H "accept: application/json" -H "C
     "ArrTx": null
   }
   ```
+
+
+---
+
+##  导出账户私钥
+
+ :warning: *警告: 仅限于Debug 版`hscli`, 用于热钱包(简单方便但不安全, 不推荐使用) , 推荐自行参考`demo`生成私钥*
+
+- HTTP请求方法：  `POST`
+
+- endpoint:    `/accounts/export`
+- 标注：   仅限于Debug 版`hscli`, 用于热钱包(简单方便但不安全, 不推荐使用) , 推荐自行参考`demo`生成私钥
+- 说明：   `password`  是使用 ` /accounts/newaccount` 接口创建账户时设置的钱包密码
+
+- 请求： 
+
+  ```shell
+  curl --location --request POST 'http://localhost:1317/accounts/export' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+    "address": "htdf10v3ewq09lq5m0mgd36x0g9stuhhgwffx0lmf3x",
+    "password": "12345678"
+  }'
+  ```
+
+- 响应 :
+  
+  ```json
+  {
+    "private_key": "8b24610a3cbfb4491f3ed88325a28254cdcea89f5cf507df62ab2c06b211edbc"
+  }
+  ```
+
+---
 
 ## 查询交易池中未确认的所有交易详情
 
@@ -1100,6 +1156,67 @@ curl -X POST "http://localhost:1317/hs/sign" -H "accept: application/json" -H "C
 
   
 
+
+##  查询节点信息
+- HTTP请求方法：    `GET` 
+- endpoint:   `/node_info`
+
+- 请求： 
+
+  ```
+  curl http://localhost:1317/node_info
+  ```
+
+- 响应 :
+
+  ```json
+  {
+    "protocol_version": {
+      "p2p": "7",
+      "block": "10",
+      "app": "0"
+    },
+    "id": "007e8043c33e216643ce96988eaa945b0bd6abb8",
+    "listen_addr": "tcp://0.0.0.0:26656",
+    "network": "testchain",
+    "version": "0.31.5",
+    "channels": "4020212223303800",
+    "moniker": "htdf_dev_net",
+    "other": {
+      "tx_index": "on",
+      "rpc_address": "tcp://0.0.0.0:26657"
+    }
+  }
+  ```
+
+---
+
+##  查询验证节点信息
+
+- HTTP请求方法：    `GET` 
+- endpoint:    `/validatorsets/latest`
+
+- 请求： 
+
+  ```shell
+  curl http://localhost:1317/validatorsets/latest
+  ```
+
+- 响应 :
+
+  ```json
+  {
+    "block_height": "4494",
+    "validators": [
+      {
+        "address": "htdfvalcons1jcxxy3k4e7mv9edagrj9svtktnx0khnyqgpc4v",
+        "pub_key": "htdfvalconspub1zcjduepqrnpf2jkfrn20rwvwavxut9va36rjxrxrnxz6e3teagnumvzqr0qqrakqmf",
+        "proposer_priority": "0",
+        "voting_power": "100"
+      }
+    ]
+  }
+  ```
 
 
 
