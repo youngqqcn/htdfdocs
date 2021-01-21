@@ -154,7 +154,7 @@ def batch_transfer(
 
 - [HTDF 主网区块链浏览器 https://www.htdfscan.com/](https://www.htdfscan.com/)
 
-- HTDF测试网(testnet)没有区块链浏览器, 请通过API[查询交易](#查询交易详情)或者[查询区块内容](#查询区块内容)
+- HTDF测试网(testnet)没有区块链浏览器, 请通过API[查询交易](./api.md#查询交易详情)或者[查询区块内容](./api.md#查询区块内容)
 
 ---
 
