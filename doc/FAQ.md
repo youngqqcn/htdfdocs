@@ -26,11 +26,11 @@
 ## 2.如何创建账户
 
 - 方式1: 自行生成私钥和地址 (推荐)
-  - [python demos](../demos/python_demos/README.md)
-  - [cpp demos](../demos/cpp_demos/README.md)
-  - [golang demos](../demos/golang_demos/README.md)
-  - [nodejs demos](../demos/nodejs_demos/README.md)
-  - [java_demos](../demos/java_demos/README.md)
+  - [python demos](../demos/python_demos/)
+  - [cpp demos](../demos/cpp_demos/)
+  - [golang demos](../demos/golang_demos/)
+  - [nodejs demos](../demos/nodejs_demos/)
+  - [java_demos](../demos/java_demos/)
 
 - 方式2: 用 *Debug*版的`hscli`可执行程序, 其中包含`/accounts/newaccount` 接口, 可以方便地实现 *节点热钱包*   ( :warning: 此方式私钥存放在节点中, 不安全, 不推荐) 
 
@@ -45,11 +45,11 @@
 ## 4.如何进行转账交易
 
 - 方式1: 自行实现签名 , 可实现*冷钱包* (推荐)
-  - [python demos](../demos/python_demos/README.md)
-  - [cpp demos](../demos/cpp_demos/README.md)
-  - [golang demos](../demos/golang_demos/README.md)
-  - [nodejs demos](../demos/nodejs_demos/README.md)
-  - [java_demos](../demos/java_demos/README.md)
+  - [python demos](../demos/python_demos/)
+  - [cpp demos](../demos/cpp_demos/)
+  - [golang demos](../demos/golang_demos/)
+  - [nodejs demos](../demos/nodejs_demos/)
+  - [java_demos](../demos/java_demos/)
 
 - 方式2: 使用 *Debug*版的`hscli`可执行程序, 其中包含`/send` 接口, 可以方便地实现 *节点热钱包*  ( :warning: 此方式私钥存放在节点中, 不安全, 不推荐)
 
