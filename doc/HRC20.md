@@ -14,7 +14,8 @@
   - [查询代币总发行量(totalSupply)](#查询代币总发行量totalSupply)
   - [查询代币简称(symbol)](#查询代币简称symbol)
   - [查代币精度(decimals)](#查代币精度decimals)
-- [例子:HRC20转账](#案例HRC20转账)
+- [案例1_HRC20转账](#案例1_HRC20转账)
+- [案例2_HRC20批量转账](#案例2_HRC20批量转账)
 
 
 
@@ -233,11 +234,13 @@ python -c "print int('$decimals',16)"
 
 
 
-# 案例HRC20转账
+# 案例1_HRC20转账
 
 > 提示: 如果你熟悉Python, 可以使用htdfsdk轻松对接HRC20
 >
 > https://github.com/youngqqcn/htdfsdk
+
+方便起见, 这里我们以`Debug`版`hscli`提供的`hs/send`接口进行演示,
 
 在开始说明如何进行HRC20转账之前, 让我们先看看HTDF主网上已有的成功的HRC20转账交易:
 
@@ -397,6 +400,12 @@ curl  'http://localhost:1317/hs/send' -X POST \
     }
 ]
 ```
+
+
+# 案例2_HRC20批量转账
+
+可以参考这个示例代码[airdrop](../demos/python_demos/airdrop_tools/)
+
 
 ---
 (结束)

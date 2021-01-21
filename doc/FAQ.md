@@ -62,7 +62,7 @@
 - 方案1： 等待区块打包
 发完一笔交易后，等待8~10秒(等待交易被打包)，再发送下一笔交易
 
-- 方案2： 改变交易的sequence, 具体实现用户参考[demos](../demos/)代码,然后根据自身实际业务需求自行修改即可. 
+- 方案2： 改变交易的sequence, 具体实现可以参考[python_demos/airdrop_tools](../demos/python_demos/airdrop_tools/airdrop.py)代码,然后根据自身实际业务需求自行修改即可. 
 
 这里以python(伪)代码, 进行算法描述:
 
