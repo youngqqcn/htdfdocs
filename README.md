@@ -14,6 +14,7 @@
   - Go语言版: [golang_demos](./demos/golang_demos/)  
   - Java版: [java_demos](./demos/java_demos/) 
   - Nodejs版: [nodejs_demos](./demos/nodejs_demos/)  
+  - 基于`Web3.js`实现的Nodejs包: [htdf_web3](./demos/web3_htdf_demos)
 
 - 🔌 [mainnet](./mainnet): HTDF主网相关
   - [如何搭建HTDF节点?](./mainnet/README.md)
