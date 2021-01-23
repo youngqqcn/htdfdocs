@@ -1,7 +1,8 @@
+提示: 可以使用htdf的sdk轻松对接HRC20
+- Python: https://github.com/youngqqcn/htdfsdk
+- Nodejs: https://www.npmjs.com/package/htdf_web3
 
-> 提示: 如果你熟悉Python, 可以使用htdfsdk轻松对接HRC20
->
-> https://github.com/youngqqcn/htdfsdk
+---
 
 
 目录
