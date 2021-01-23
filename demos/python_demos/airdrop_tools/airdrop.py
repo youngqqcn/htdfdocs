@@ -25,13 +25,13 @@ COMMON = {
 # 自行修改
 TOKEN_CFG = {
     'DFW': {
-        'ADDRESS': '--------TODO:地址---------',
-        'PRIVATE_KEY': '-------TODO:私钥--------',
-        'MEMO':'糖果',
-        'RANDOM_START': 100,
-        'RANDOM_END': 2000,
+        'ADDRESS': '--------TODO:地址---------', # from地址
+        'PRIVATE_KEY': '-------TODO:私钥--------', # from地址私钥
+        'MEMO':'糖果',  # 转账备注
+        'RANDOM_START': 100,  
+        'RANDOM_END': 2000,  # 和 RANDOM_START配合, 生成 100~2000之间的随机数
         'ADDRESS_START_INDEX':1,
-        'ADDRESS_END_INDEX': 3752,
+        'ADDRESS_END_INDEX': 3752, #和 ADDRESS_START_INDEX 截取地址文件的内容
     }
 }
 

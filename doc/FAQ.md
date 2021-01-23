@@ -1,55 +1,73 @@
 ## 目录
-- [01) API文档在哪?](#1.API文档在哪)
-- [02) 如何创建账户?](#2.如何创建账户)
-- [03) 如何获取测试链(testchain)的测试币?](#3.如何获取测试链(testchain)的测试币)
-- [04) 如何进行转账交易?](#4.如何进行转账交易?)
-- [05) hscli的Release版和Debug版有什么区别?](#5.`hscli`的Release版和Debug版有什么区)
-- [06) 如何查询交易内容?](#6.如何查询交易内容)
-- [07) 区块链浏览器网址?](#7.区块链浏览器网址)
-- [08) 搭建全节点所需的服务器配置?](#8.搭建全节点所需的服务器配置)
-- [09) 如何搭建节点?](#9.如何搭建节点)
-- [10) 最小区块确认数是多少?](#10.最小区块确认数是多少)
-- [11) 如何检验地址有效性?](#11.如何检验地址有效性)
-- [12) token单位换算?](#12.token单位换算)
-- [13) HTDF公链黑洞地址?](#13.HTDF公链黑洞地址)
+- [01) API文档在哪?](#1_API文档在哪)
+- [02) 如何创建账户?](#2_如何创建账户)
+- [03) 有没有公共的测试链节点?](#3_有没有公共的测试链节点)
+- [04) 如何获取测试链(testchain)的测试币?](#4_如何获取测试链testchain的测试币)
+- [05) 如何进行转账交易?](#5_如何进行转账交易)
+- [06) hscli的Release版和Debug版有什么区别?](#6_hscli的Release版和Debug版有什么区别)
+- [07) 如何查询交易内容?](#7_如何查询交易内容)
+- [08) 区块链浏览器网址?](#8_区块链浏览器网址)
+- [09) 搭建全节点所需的服务器配置?](#9_搭建全节点所需的服务器配置)
+- [10) 如何搭建节点?](#10_如何搭建节点)
+- [11) 最小区块确认数是多少?](#11_最小区块确认数是多少)
+- [12) 如何检验地址有效性?](#12_如何检验地址有效性)
+- [13) token单位换算?](#13_token单位换算)
+- [14) HTDF公链黑洞地址?](#14_HTDF公链黑洞地址)
 
 ---
 
 # 对接常见问题汇总
 
-## 1.API文档在哪
+## 1_API文档在哪
 
 - [API文档: api.md](./api.md)
 
 ---
 
-## 2.如何创建账户
+## 2_如何创建账户
 
 - 方式1: 自行生成私钥和地址 (推荐)
-  - [python demos](../demos/python_demos/README.md)
-  - [cpp demos](../demos/cpp_demos/README.md)
-  - [golang demos](../demos/golang_demos/README.md)
-  - [nodejs demos](../demos/nodejs_demos/README.md)
-  - [java_demos](../demos/java_demos/README.md)
+  - [python demos](../demos/python_demos/)
+  - [cpp demos](../demos/cpp_demos/)
+  - [golang demos](../demos/golang_demos/)
+  - [nodejs demos](../demos/nodejs_demos/)
+  - [java_demos](../demos/java_demos/)
 
 - 方式2: 用 *Debug*版的`hscli`可执行程序, 其中包含`/accounts/newaccount` 接口, 可以方便地实现 *节点热钱包*   ( :warning: 此方式私钥存放在节点中, 不安全, 不推荐) 
 
 --- 
 
-## 3.如何获取测试链(testchain)的测试币
 
-转账demo中的地址 `htdf1xwpsq6yqx0zy6grygy7s395e2646wggufqndml` 有一定数量的测试链(testchain)的测试币可直接使用. 
+## 3_有没有公共的测试链节点
+
+以下4个公共testnet节点, 可直接使用
+
+|节点名称      |所在位置|        域名：端口         |
+|------------|------|--------------------------|
+|test01 | 深圳 | htdf2020-test01.orientwalt.cn:1317|
+|test02 | 北京 | htdf2020-test02.orientwalt.cn:1317|
+|test03 | 杭州 | htdf2020-test03.orientwalt.cn:1317|
+|test04 | 青岛 | htdf2020-test04.orientwalt.cn:1317|
+
 
 ---
 
-## 4.如何进行转账交易
+## 4_如何获取测试链testchain的测试币
+
+转账demo中的地址 `htdf1xwpsq6yqx0zy6grygy7s395e2646wggufqndml` 有一定数量的测试链(testchain)的测试币可直接使用. 
+
+
+
+---
+
+## 5_如何进行转账交易
 
 - 方式1: 自行实现签名 , 可实现*冷钱包* (推荐)
-  - [python demos](../demos/python_demos/README.md)
-  - [cpp demos](../demos/cpp_demos/README.md)
-  - [golang demos](../demos/golang_demos/README.md)
-  - [nodejs demos](../demos/nodejs_demos/README.md)
-  - [java_demos](../demos/java_demos/README.md)
+  - [python demos](../demos/python_demos/)
+  - [cpp demos](../demos/cpp_demos/)
+  - [golang demos](../demos/golang_demos/)
+  - [nodejs demos](../demos/nodejs_demos/)
+  - [java_demos](../demos/java_demos/)
 
 - 方式2: 使用 *Debug*版的`hscli`可执行程序, 其中包含`/send` 接口, 可以方便地实现 *节点热钱包*  ( :warning: 此方式私钥存放在节点中, 不安全, 不推荐)
 
@@ -62,7 +80,7 @@
 - 方案1： 等待区块打包
 发完一笔交易后，等待8~10秒(等待交易被打包)，再发送下一笔交易
 
-- 方案2： 改变交易的sequence, 具体实现用户参考[demos](../demos/)代码,然后根据自身实际业务需求自行修改即可. 
+- 方案2： 改变交易的sequence, 具体实现可以参考[python_demos/airdrop_tools](../demos/python_demos/airdrop_tools/airdrop.py)代码,然后根据自身实际业务需求自行修改即可. 
 
 这里以python(伪)代码, 进行算法描述:
 
@@ -112,7 +130,7 @@ def batch_transfer(
 
 ---
 
-## 5.`hscli`的Release版和Debug版有什么区别
+## 6_hscli的Release版和Debug版有什么区别
 
  :warning:  **警告: Debug版`hscli`执行程序仅用于开发测试环境, 不推荐用于生产环境** 
 
@@ -121,7 +139,7 @@ def batch_transfer(
 
 ---
 
-## 6.如何查询交易内容
+## 7_如何查询交易内容
 
 使用 `/txs/{txhash}` 接口查询接口 ，`txhash` 是交易hash. 
 
@@ -132,15 +150,15 @@ def batch_transfer(
 ---
 
 
-## 7.区块链浏览器网址
+## 8_区块链浏览器网址
 
 - [HTDF 主网区块链浏览器 https://www.htdfscan.com/](https://www.htdfscan.com/)
 
-- [HTDF 测试公网(testnet) 区块链浏览器 http://test.htdfscan.com/](http://test.htdfscan.com/)
+- HTDF测试网(testnet)没有区块链浏览器, 请通过API[查询交易](./api.md#查询交易详情)或者[查询区块内容](./api.md#查询区块内容)
 
 ---
 
-## 8.搭建全节点所需的服务器配置
+## 9_搭建全节点所需的服务器配置
 
 |内容|建议配置|最低配置|
 |:-----:|:-----:|:-----:|
@@ -150,19 +168,19 @@ def batch_transfer(
 
 ---
 
-## 9.如何搭建节点
+## 10_如何搭建节点
 
 - [搭建观察节点(主网)](../mainnet/README.md)
 
 ---
 
-## 10.最小区块确认数是多少
+## 11_最小区块确认数是多少
 
 HTDF公链不存在分叉，所以交易只需1个区块确认.
 
 ---
 
-## 11.如何检验地址有效性
+## 12_如何检验地址有效性
 
 - 算法描述
 
@@ -199,7 +217,7 @@ HTDF公链不存在分叉，所以交易只需1个区块确认.
 
 ---
 
-## 12.token单位换算
+## 13_token单位换算
 
 - 我们的数量单位，完全参考BTC
 - 两个数量单位 HTDF、satoshi（聪）
@@ -213,7 +231,7 @@ HTDF公链不存在分叉，所以交易只需1个区块确认.
 
 ---
 
-## 13.HTDF公链黑洞地址
+## 14_HTDF公链黑洞地址
 黑洞地址一般用于做币销毁相关业务；
 
 HTDF公链（建议的）黑洞地址如下：
