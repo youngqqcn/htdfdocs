@@ -43,7 +43,6 @@ function Txs(){
    }) 
 }
 
-// tx D1540FB51239AF9DF8DDA6DE332DA6247D4B142F862521D9EA061B43D185F2B7
 function Transfer(){
    htdf.web.Transfer({
      'from':htdf_address,
