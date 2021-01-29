@@ -83,6 +83,9 @@ I[2019-09-11|14:37:35.276] Committed state                              module=s
 
 ```
 
+> 注意: 刚刚启动hsd时可能会错误日志输出类似`p2p timeout`这样的错误信息,这是p2p发现的过程,这是正常现象,等待几分钟时间后会正常开始同步区块.
+
+
 ## 启动 REST 服务(RPC 接口)
 
 启动REST服务，其中`chain-id`，主网(生产环境)是`mainchain`
