@@ -26,7 +26,7 @@
 https://gitee.com/orientwalt/htdf/releases/v1.3.1
 
 - 下载配置文件和创世文件:
- https://gitee.com/orientwalt/docs/attach_files/608989/download/config.tar.gz
+ https://gitee.com/orientwalt/docs/attach_files/609015/download/config.tar.gz
 
     进行校验
     ```
