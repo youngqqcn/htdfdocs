@@ -15,7 +15,7 @@
 |内存|8G|4G|
 |磁盘|70G 可扩展|70G 可扩展|
 
-> 截至2021-01-23,HTDF全节点占用磁盘空间`54G`
+> 截至2021-02-24, HTDF全节点占用磁盘空间`56G`
 ---
 
 ## 获取最新应用和配置
@@ -26,7 +26,15 @@
 https://gitee.com/orientwalt/htdf/releases/v1.3.1
 
 - 下载配置文件和创世文件:
- https://gitee.com/orientwalt/docs/attach_files/593332/download/config.tar.gz
+ https://gitee.com/orientwalt/docs/attach_files/608989/download/config.tar.gz
+
+    进行校验
+    ```
+    $ sha256sum config.tar.gz
+    c8a4513bec0dda89b0877b0b7b5de51ff0a14165b138b0841ddc4162cf199dc9  config.tar.gz
+    ```
+
+> 最后更新时间: 2021-02-24
 
 
 ## 解压和部署
