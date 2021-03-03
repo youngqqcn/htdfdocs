@@ -42,12 +42,12 @@
 
 以下4个公共testnet节点, 可直接使用
 
-|节点名称      |所在位置|        域名：端口         |
-|------------|------|--------------------------|
-|test01 | 深圳 | htdf2020-test01.orientwalt.cn:1317|
-|test02 | 北京 | htdf2020-test02.orientwalt.cn:1317|
-|test03 | 杭州 | htdf2020-test03.orientwalt.cn:1317|
-|test04 | 青岛 | htdf2020-test04.orientwalt.cn:1317|
+|节点名称   |       域名：端口         |
+|---------|--------------------------|
+|node0 | htdf2020-test01.orientwalt.cn:1317|
+|node1 | htdf2020-test02.orientwalt.cn:1317|
+|node2 | htdf2020-test03.orientwalt.cn:1317|
+|node3 | htdf2020-test04.orientwalt.cn:1317|
 
 
 ---
@@ -164,8 +164,9 @@ def batch_transfer(
 |:-----:|:-----:|:-----:|
 |CPU|4核|2核|
 |内存|8G|4G|
-|磁盘|60G 可扩展|60G 可扩展|
+|磁盘|70G 可扩展|70G 可扩展|
 
+> 截至2021-01-23,HTDF全节点占用磁盘空间`54G`
 ---
 
 ## 10_如何搭建节点

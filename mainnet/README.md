@@ -13,9 +13,10 @@
 |:-----:|:-----:|:-----:|
 |CPU|4核|2核|
 |内存|8G|4G|
-|磁盘|60G(可扩展)|60G(可扩展)|
-|带宽|2~4M| 1M |
+|磁盘|70G 可扩展|70G 可扩展|
 
+> 截至2021-02-24, HTDF全节点占用磁盘空间`56G`
+---
 
 ## 获取最新应用和配置
 
@@ -25,7 +26,15 @@
 https://gitee.com/orientwalt/htdf/releases/v1.3.1
 
 - 下载配置文件和创世文件:
- https://gitee.com/orientwalt/docs/attach_files/593332/download/config.tar.gz
+ https://gitee.com/orientwalt/docs/attach_files/609015/download/config.tar.gz
+
+    进行校验
+    ```
+    $ sha256sum config.tar.gz
+    c8a4513bec0dda89b0877b0b7b5de51ff0a14165b138b0841ddc4162cf199dc9  config.tar.gz
+    ```
+
+> 最后更新时间: 2021-02-24
 
 
 ## 解压和部署
@@ -81,6 +90,9 @@ I[2019-09-11|14:37:35.271] Executed block                               module=s
 I[2019-09-11|14:37:35.276] Committed state                              module=state height=867123 txs=0 appHash=2647D3A0A1CE1B924C24CE158AD2B44EFB6CC40516FAFD9164AF8911BDC230D9
 
 ```
+
+> 注意: 刚刚启动hsd时可能会错误日志输出类似`p2p timeout`这样的错误信息,这是p2p发现的过程,这是正常现象,等待几分钟时间后会正常开始同步区块.
+
 
 ## 启动 REST 服务(RPC 接口)
 
