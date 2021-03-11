@@ -23,10 +23,12 @@
 
 ### 下载(使用浏览器进行下载)
 - 下载相应操作系统(Linux/Windows/MacOS)的可执行文件: 
-https://gitee.com/orientwalt/htdf/releases/v1.3.1
+https://github.com/orientwalt/htdf/releases/tag/v1.3.1
+(或者从gitee下载 https://gitee.com/orientwalt/htdf/releases/v1.3.1)
 
 - 下载配置文件和创世文件:
- https://gitee.com/orientwalt/docs/attach_files/609015/download/config.tar.gz
+https://github.com/orientwalt/docs/releases/download/v1.2.1/config.tar.gz
+(或者从gitee下载 https://gitee.com/orientwalt/docs/attach_files/609015/download/config.tar.gz)
 
     进行校验
     ```
