@@ -259,7 +259,7 @@
 - 请求： 
 
   ```shell
-  curl http://localhost:1317/block_detail/100
+  curl http://localhost:1317/block_detail/1222934
   ```
 
 - 响应 :
