@@ -4,16 +4,16 @@
 - 🔥 [常见问题汇总](./doc/FAQ.md#目录)
 
 - 📜 [doc](./doc): 包含了API文档, HRC20相关文档和常见问题汇总文档
-  - [api.md](./doc/api.md): API文档 
+  - [api.md](./doc/api.md): API文档 (包括HTDF2.0修改和新增的API)
   - [FAQ.md](./doc/FAQ.md): 常见问题
   - [HRC20.md](./doc/HRC20.md): HRC20对接相关问题
 
 - 🛠 [demos](./demos): 包含了 *账户地址生成* 和 *普通转账* 示例代码
-  - Python版: [python_demos](./demos/python_demos/)  
-  - C++版: [cpp_demos](./demos/cpp_demos/) 
-  - Go语言版: [golang_demos](./demos/golang_demos/)  
-  - Java版: [java_demos](./demos/java_demos/) 
-  - Nodejs版: [nodejs_demos](./demos/nodejs_demos/)  
+  - Python版: [python_demos](./demos/python_demos/)
+  - C++版: [cpp_demos](./demos/cpp_demos/)
+  - Go语言版: [golang_demos](./demos/golang_demos/)
+  - Java版: [java_demos](./demos/java_demos/)
+  - Nodejs版: [nodejs_demos](./demos/nodejs_demos/)
   - 基于`Web3.js`实现的Nodejs包: [htdf_web3](./demos/web3_htdf_demos)
 
 - 🔌 [mainnet](./mainnet): HTDF主网相关
